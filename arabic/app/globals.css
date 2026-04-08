@@ -1,0 +1,464 @@
+@import "tailwindcss";
+
+:root {
+  /* ═══════════════════════════════════════════════
+     MIZAN BRAND DESIGN TOKENS
+     Source: BRAND_BOOK.md v3.0
+     ═══════════════════════════════════════════════ */
+
+  /* Colors — Primary Palette */
+  --mizan-cream:  #F1F2EC;
+  --mizan-sand:   #E6E4DC;
+  --mizan-deep:   #2A2F35;
+  --mizan-slate:  #4D555E;
+  --mizan-mauve:  #A5887E;
+  --mizan-warm:   #C4A882;
+  --mizan-chat:   #E8F0E4;
+  --mizan-grey:   #87868C;
+  --mizan-ink:    #1A1E23;
+
+  /* Colors — Semantic */
+  --color-success: #27AE60;
+  --color-error:   #C0392B;
+  --color-success-bg: rgba(39, 174, 96, 0.1);
+  --color-error-bg:   rgba(192, 57, 43, 0.1);
+
+  /* Colors — Derived (Opacity) */
+  --mauve-5:  rgba(165, 136, 126, 0.05);
+  --mauve-10: rgba(165, 136, 126, 0.1);
+  --mauve-30: rgba(165, 136, 126, 0.3);
+  --cream-30: rgba(241, 242, 236, 0.3);
+  --cream-40: rgba(241, 242, 236, 0.4);
+  --cream-50: rgba(241, 242, 236, 0.5);
+  --cream-60: rgba(241, 242, 236, 0.6);
+  --cream-80: rgba(241, 242, 236, 0.8);
+  --deep-10:  rgba(42, 47, 53, 0.1);
+  --grey-20:  rgba(135, 134, 140, 0.2);
+  --grey-50:  rgba(135, 134, 140, 0.5);
+
+  /* Semantic Mapping — Surfaces */
+  --bg-primary:    var(--mizan-cream);
+  --bg-secondary:  var(--mizan-sand);
+  --bg-card:       #FFFFFF;
+  --bg-card-hover: var(--mizan-sand);
+  --bg-dark:       var(--mizan-deep);
+  --bg-darker:     var(--mizan-ink);
+
+  /* Semantic Mapping — Text */
+  --text-primary:   var(--mizan-deep);
+  --text-secondary: var(--mizan-grey);
+  --text-muted:     var(--mizan-slate);
+  --text-accent:    var(--mizan-mauve);
+
+  /* Semantic Mapping — Borders */
+  --border-default: var(--mizan-sand);
+  --border-subtle:  rgba(230, 228, 220, 0.6);
+  --border-active:  var(--mizan-mauve);
+  --border-focus:   var(--mizan-mauve);
+
+  /* Typography */
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-sans:    'Montserrat', Inter, system-ui, sans-serif;
+  --font-arabic:  'Amiri', 'Noto Naskh Arabic', serif;
+  --font-mono:    ui-monospace, monospace;
+
+  /* Spacing — 4px base (Mizan §5.2) */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-32: 128px;
+
+  /* Radius — SHARP corners (core brand trait) */
+  --radius-none: 0px;
+  --radius-sm:   0px;
+  --radius-md:   0px;
+  --radius-lg:   0px;
+  --radius-xl:   0px;
+  --radius-full: 9999px;
+
+  /* Motion (Mizan §4.1) */
+  --duration-micro:   150ms;
+  --duration-normal:  300ms;
+  --duration-slow:    600ms;
+  --duration-ambient: 6000ms;
+  --ease-default:     ease-in-out;
+  --transition-fast:   150ms ease-in-out;
+  --transition-normal: 300ms ease-in-out;
+  --transition-slow:   600ms ease-in-out;
+
+  /* Shadows */
+  --shadow-none:  none;
+  --shadow-card:  0 1px 3px rgba(42, 47, 53, 0.06);
+  --shadow-hover: 0 20px 60px -15px rgba(45, 50, 58, 0.15);
+
+  /* Sidebar */
+  --sidebar-width: 260px;
+}
+
+/* ═══════════════════════════════════════════════
+   BASE STYLES
+   ═══════════════════════════════════════════════ */
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ═══════════════════════════════════════════════
+   TYPOGRAPHY UTILITIES
+   ═══════════════════════════════════════════════ */
+
+.font-arabic {
+  font-family: var(--font-arabic);
+}
+
+.font-display {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* Section label (Mizan §6.3) */
+.section-label {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.35em;
+  color: var(--mizan-mauve);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.section-label::before {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 2px;
+  background: var(--mizan-mauve);
+}
+
+/* ═══════════════════════════════════════════════
+   COMPONENT: CARD
+   Mizan §6.2 — Solid fills, sharp corners, hover lift
+   ═══════════════════════════════════════════════ */
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-card);
+  transition: all var(--transition-normal);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
+}
+
+/* Prevent lift on cards used as containers */
+.card-static {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-card);
+}
+
+/* ═══════════════════════════════════════════════
+   COMPONENT: GLASS PANEL (for sidebar/nav)
+   Mizan §6.4 — Dark glass variant
+   ═══════════════════════════════════════════════ */
+
+.glass-panel {
+  background: var(--mizan-deep);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ═══════════════════════════════════════════════
+   COMPONENT: BUTTONS
+   Mizan §6.1 — Sharp, uppercase, tracked
+   ═══════════════════════════════════════════════ */
+
+.btn-primary {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  padding: var(--space-4) var(--space-10);
+  background: var(--mizan-mauve);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.btn-primary:hover {
+  background: var(--mizan-warm);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-primary:disabled {
+  background: var(--grey-20);
+  color: var(--grey-50);
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  padding: var(--space-4) var(--space-10);
+  background: var(--mizan-deep);
+  color: var(--mizan-cream);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.btn-secondary:hover {
+  background: var(--mizan-slate);
+}
+
+.btn-ghost {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  padding: var(--space-4) var(--space-10);
+  background: transparent;
+  color: var(--mizan-mauve);
+  border: 1px solid var(--cream-30);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.btn-ghost:hover {
+  background: var(--mauve-5);
+}
+
+/* ═══════════════════════════════════════════════
+   COMPONENT: FORM INPUTS
+   Mizan §11 — Sharp, Sand border, Mauve focus
+   ═══════════════════════════════════════════════ */
+
+.input-field {
+  height: 48px;
+  font-family: var(--font-sans);
+  font-weight: 300;
+  font-size: 14px;
+  background: #FFFFFF;
+  border: 1px solid var(--mizan-sand);
+  padding: 0 var(--space-4);
+  color: var(--text-primary);
+  transition: border-color var(--transition-fast);
+  outline: none;
+}
+
+.input-field:focus {
+  border-color: var(--mizan-mauve);
+}
+
+.input-field::placeholder {
+  color: var(--mizan-grey);
+}
+
+/* ═══════════════════════════════════════════════
+   TOAST NOTIFICATIONS (Mizan §13)
+   ═══════════════════════════════════════════════ */
+
+.toast-success {
+  background: var(--mizan-chat);
+  border-left: 3px solid var(--color-success);
+}
+
+.toast-error {
+  background: #FFF0EE;
+  border-left: 3px solid var(--color-error);
+}
+
+.toast-info {
+  background: var(--mizan-sand);
+  border-left: 3px solid var(--mizan-mauve);
+}
+
+/* ═══════════════════════════════════════════════
+   BRAND DIVIDER (Mizan §2.5)
+   ═══════════════════════════════════════════════ */
+
+.brand-divider {
+  height: 2px;
+  background: linear-gradient(90deg, var(--mizan-mauve), transparent);
+}
+
+/* ═══════════════════════════════════════════════
+   ANIMATIONS (Mizan §4.2)
+   ═══════════════════════════════════════════════ */
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-slide-up {
+  animation: fadeUp 0.6s ease-in-out forwards;
+}
+
+.stagger-1 { animation-delay: 150ms; }
+.stagger-2 { animation-delay: 300ms; }
+.stagger-3 { animation-delay: 450ms; }
+.stagger-4 { animation-delay: 600ms; }
+.stagger-5 { animation-delay: 750ms; }
+
+@keyframes pulseSuccess {
+  0%   { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.4); }
+  100% { box-shadow: 0 0 0 15px rgba(39, 174, 96, 0); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-8px); }
+  75%      { transform: translateX(8px); }
+}
+
+.animate-shake {
+  animation: shake 0.4s ease-in-out;
+}
+
+.animate-pulse-green {
+  animation: pulseSuccess 1s ease-out;
+}
+
+/* Flashcard 3D */
+.perspective-1000 {
+  perspective: 1000px;
+}
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+.backface-hidden {
+  backface-visibility: hidden;
+}
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+/* ═══════════════════════════════════════════════
+   CUSTOM SCROLLBAR (Mizan palette)
+   ═══════════════════════════════════════════════ */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--mizan-cream);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--mizan-sand);
+  border-radius: 0;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--mizan-grey);
+}
+
+/* ═══════════════════════════════════════════════
+   REDUCED MOTION (Mizan §4.3 — mandatory)
+   ═══════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   SELECTION
+   ═══════════════════════════════════════════════ */
+
+::selection {
+  background: var(--mauve-30);
+  color: var(--mizan-deep);
+}
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE — Mizan §14 Mobile Patterns
+   Mobile: 32px padding, single column, 14px min body
+   Desktop: 64px padding, multi-column grids
+   ═══════════════════════════════════════════════ */
+
+/* Mobile-first (default): 375px+ */
+@media (max-width: 767px) {
+  body {
+    font-size: 14px;
+  }
+
+  h1 {
+    font-size: 28px !important;
+    letter-spacing: -0.01em !important;
+  }
+
+  .btn-primary,
+  .btn-secondary,
+  .btn-ghost {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Stack cards vertically */
+  .grid-cols-2,
+  .grid-cols-3 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Ensure touch targets */
+  button,
+  a,
+  input,
+  select {
+    min-height: 44px;
+  }
+}
+
+/* Tablet: 768px+ */
+@media (min-width: 768px) {
+  body {
+    font-size: 15px;
+  }
+}
+
+/* Desktop: 1024px+ */
+@media (min-width: 1024px) {
+  main {
+    padding: 40px 64px 40px !important;
+  }
+
+  body {
+    font-size: 16px;
+  }
+}
