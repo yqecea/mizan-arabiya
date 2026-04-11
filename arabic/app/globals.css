@@ -128,25 +128,67 @@ body {
   font-weight: 400;
 }
 
-/* Section label (Mizan §6.3) */
-.section-label {
-  font-family: var(--font-sans);
-  font-weight: 700;
+/* Section label removed */
+
+.text-micro-label {
   font-size: 10px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.35em;
+  letter-spacing: 0.25em;
   color: var(--mizan-mauve);
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
 }
 
-.section-label::before {
-  content: '';
-  display: block;
-  width: 40px;
-  height: 2px;
+.heading-display-black {
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.breadcrumb-nav {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--mizan-slate);
+  margin-bottom: var(--space-6);
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+.breadcrumb-nav a {
+  transition: color var(--transition-fast);
+}
+.breadcrumb-nav a:hover {
+  color: var(--mizan-deep);
+}
+.breadcrumb-nav .separator {
+  color: var(--mizan-sand);
+}
+
+.tab-btn {
+  padding: 10px 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  border: none;
+  cursor: pointer;
+  transition: all 300ms ease-in-out;
+}
+.tab-btn.active {
   background: var(--mizan-mauve);
+  color: white;
+}
+.tab-btn.inactive {
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.card-telemetry {
+  background: var(--bg-primary);
+  border: 1px solid var(--mizan-deep);
+  box-shadow: none;
+  border-radius: var(--radius-none);
 }
 
 /* ═══════════════════════════════════════════════

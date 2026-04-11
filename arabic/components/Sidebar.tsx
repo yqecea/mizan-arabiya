@@ -83,15 +83,13 @@ export function Sidebar() {
       </aside>
 
       {/* ═══════════════════════════════════════════════
-          MOBILE TOP BAR — Logo + hamburger
-          Mizan §14: Burger menu → fullscreen overlay
+          MOBILE TOP BAR — Logo isolated
           ═══════════════════════════════════════════════ */}
       <header
-        className="lg:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between"
+        className="lg:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-center"
         style={{
           height: '56px',
           background: 'var(--mizan-ink)',
-          padding: '0 20px',
           borderBottom: '1px solid rgba(255,255,255,0.06)',
         }}
       >
@@ -114,65 +112,50 @@ export function Sidebar() {
             </span>
           </div>
         </div>
-
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          style={{ color: 'var(--mizan-cream)', minWidth: '48px', minHeight: '48px' }}
-          className="flex items-center justify-center"
-          aria-label="Открыть меню"
-        >
-          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
       </header>
 
       {/* ═══════════════════════════════════════════════
-          MOBILE FULLSCREEN OVERLAY MENU
-          Mizan §14: Burger → fullscreen overlay, Deep bg
+          MOBILE BOTTOM NAVIGATION
+          Mizan UX Pattern: Fixed bottom bar for fast access
           ═══════════════════════════════════════════════ */}
-      {mobileMenuOpen && (
-        <div
-          className="lg:hidden fixed inset-0 z-40 flex flex-col animate-fade-slide-up"
-          style={{
-            background: 'var(--mizan-deep)',
-            paddingTop: '56px',
-          }}
-        >
-          <nav className="flex flex-col items-center justify-center flex-1 gap-2 px-8">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-4 w-full justify-center py-4 transition-all"
-                  style={{
-                    color: isActive ? 'var(--mizan-cream)' : 'var(--cream-50)',
-                    borderBottom: isActive ? '2px solid var(--mizan-mauve)' : '2px solid transparent',
-                    fontWeight: isActive ? 900 : 400,
-                    fontSize: '14px',
-                    letterSpacing: '0.2em',
-                    textTransform: 'uppercase' as const,
-                    minHeight: '48px',
-                  }}
-                >
-                  <item.icon size={20} strokeWidth={isActive ? 2 : 1.5} />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
+      <nav
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around"
+        style={{
+          height: 'max(64px, calc(64px + env(safe-area-inset-bottom)))',
+          paddingBottom: 'env(safe-area-inset-bottom)',
+          background: 'var(--mizan-ink)',
+          borderTop: '1px solid rgba(255,255,255,0.06)',
+        }}
+      >
+        {navItems.map((item) => {
+          const isActive = pathname === item.href;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="flex flex-col items-center justify-center flex-1 h-full pt-1"
+              style={{
+                color: isActive ? 'var(--mizan-cream)' : 'var(--cream-50)',
+                background: isActive ? 'rgba(165, 136, 126, 0.08)' : 'transparent',
+              }}
+            >
+              <item.icon size={18} className="mb-1" strokeWidth={isActive ? 2 : 1.5} />
+              <span
+                style={{
+                  fontSize: '8px',
+                  fontWeight: isActive ? 700 : 400,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                {item.label}
+              </span>
+            </Link>
+          );
+        })}
+      </nav>
 
-          <div
-            className="text-center py-6"
-            style={{ fontSize: '9px', letterSpacing: '0.3em', textTransform: 'uppercase' as const, color: 'var(--cream-30)', fontWeight: 700 }}
-          >
-            © 2026 Mizan · Arabiya
-          </div>
-        </div>
-      )}
-
-      {/* Mobile spacer — push content below fixed header */}
+      {/* Mobile top spacer — push content below fixed header */}
       <div className="lg:hidden" style={{ height: '56px' }} />
     </>
   );
