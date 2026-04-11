@@ -12,10 +12,13 @@ import { useEffect, useState } from 'react';
 
 export default function Dashboard() {
   const { progress } = useProgress();
-  const [wordOfDay] = useState(() => {
+  const [wordOfDay, setWordOfDay] = useState<typeof VERBS[0] | null>(null);
+
+  useEffect(() => {
     const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 1000 / 60 / 60 / 24);
-    return VERBS[dayOfYear % VERBS.length];
-  });
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Need to load wordOfDay on client to avoid hydration mismatch
+    setWordOfDay(VERBS[dayOfYear % VERBS.length]);
+  }, []);
 
   if (!progress || !wordOfDay) {
     return (
