@@ -6,6 +6,37 @@ import { PRONOUNS } from '@/data/conjugations';
 import { conjugate, Tense, getRussianVerbTranslation } from '@/lib/conjugationEngine';
 import { ArabicText } from '@/components/ArabicText';
 import { useProgress } from '@/hooks/useProgress';
+import Link from 'next/link';
+import { ArrowUpRight, UserCircle, User, Users, UserPlus } from 'lucide-react';
+
+const MATRIX = [
+  {
+    person: 3,
+    title: '3-е лицо (Он/Она)',
+    icon: ArrowUpRight,
+    rows: [
+      { gender: 'm', items: ['hum', 'huma_m', 'huwa'] },
+      { gender: 'f', items: ['hunna', 'huma_f', 'hiya'] }
+    ]
+  },
+  {
+    person: 2,
+    title: '2-е лицо (Ты/Вы)',
+    icon: UserCircle,
+    rows: [
+      { gender: 'm', items: ['antum', 'antuma', 'anta'] },
+      { gender: 'f', items: ['antunna', 'antuma', 'anti'] }
+    ]
+  },
+  {
+    person: 1,
+    title: '1-е лицо (Я/Мы)',
+    icon: User,
+    rows: [
+      { gender: 'n', items: ['nahnu', null, 'ana'] }
+    ]
+  }
+];
 
 function shuffle<T>(array: T[]): T[] {
   const newArr = [...array];
@@ -83,36 +114,29 @@ export default function Conjugation() {
     <div className="max-w-5xl mx-auto space-y-6 animate-fade-slide-up">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <p className="section-label mb-3">Грамматика</p>
-          <h1 className="text-3xl mb-2" style={{ fontWeight: 900, letterSpacing: '-0.02em' }}>
+          <nav className="flex flex-wrap items-center gap-2 text-micro-label mb-4 text-[var(--mizan-slate)]">
+            <Link href="/" className="hover:text-[var(--mizan-mauve)] transition-colors">ГЛАВНАЯ</Link>
+            <span className="text-[var(--mizan-sand)]">/</span>
+            <span className="text-[var(--mizan-deep)]">СПРЯЖЕНИЯ</span>
+            <span className="text-[var(--mizan-sand)]">/</span>
+            <span className="text-[var(--mizan-deep)] uppercase font-mono">{mode === 'table' ? currentVerb.root : practiceQuestion.verb.root}</span>
+          </nav>
+          <h1 className="text-3xl mb-2 heading-display-black text-[var(--text-primary)]">
             Спряжения
           </h1>
-          <p className="font-display" style={{ color: 'var(--mizan-mauve)' }}>Тренажёр глагольных форм</p>
+          <p className="font-display text-[var(--mizan-mauve)]">Тренажёр глагольных форм</p>
         </div>
 
-        <div className="flex" style={{ border: '1px solid var(--border-default)' }}>
+        <div className="flex border border-[var(--border-default)]">
           <button
             onClick={() => setMode('table')}
-            style={{
-              padding: '10px 20px', fontSize: '11px', fontWeight: 700,
-              textTransform: 'uppercase', letterSpacing: '0.15em',
-              background: mode === 'table' ? 'var(--mizan-mauve)' : 'transparent',
-              color: mode === 'table' ? 'white' : 'var(--text-secondary)',
-              border: 'none', cursor: 'pointer', transition: 'all 300ms ease-in-out',
-            }}
+            className={`tab-btn ${mode === 'table' ? 'active' : 'inactive'}`}
           >
             Справочник
           </button>
           <button
             onClick={() => setMode('practice')}
-            style={{
-              padding: '10px 20px', fontSize: '11px', fontWeight: 700,
-              textTransform: 'uppercase', letterSpacing: '0.15em',
-              background: mode === 'practice' ? 'var(--mizan-mauve)' : 'transparent',
-              color: mode === 'practice' ? 'white' : 'var(--text-secondary)',
-              border: 'none', borderLeft: '1px solid var(--border-default)',
-              cursor: 'pointer', transition: 'all 300ms ease-in-out',
-            }}
+            className={`tab-btn border-l border-[var(--border-default)] ${mode === 'practice' ? 'active' : 'inactive'}`}
           >
             Практика
           </button>
@@ -125,7 +149,7 @@ export default function Conjugation() {
             <div className="card-static p-4">
               <label
                 htmlFor="verb-select"
-                style={{ display: 'block', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.25em', color: 'var(--mizan-mauve)', marginBottom: '8px' }}
+                className="block text-micro-label mb-2"
               >
                 Глагол
               </label>
@@ -142,7 +166,7 @@ export default function Conjugation() {
             </div>
             <div className="card-static p-4">
               <label
-                style={{ display: 'block', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.25em', color: 'var(--mizan-mauve)', marginBottom: '8px' }}
+                className="block text-micro-label mb-2"
               >
                 Время
               </label>
@@ -168,44 +192,104 @@ export default function Conjugation() {
             </div>
           </div>
 
-          <div className="card-static overflow-hidden">
-            <div
-              className="grid grid-cols-3 p-4 text-center"
-              style={{
-                background: 'var(--mizan-sand)',
-                borderBottom: '1px solid var(--border-default)',
-                fontSize: '10px', fontWeight: 700, textTransform: 'uppercase',
-                letterSpacing: '0.25em', color: 'var(--mizan-mauve)',
-              }}
-            >
-              <div>Местоимение</div>
-              <div>Форма</div>
-              <div>Перевод</div>
-            </div>
-            <div>
-              {PRONOUNS.map((pronoun, idx) => {
-                const conjugated = conjugate(currentVerb, selectedTense, pronoun.id);
-                return (
-                  <div
-                    key={pronoun.id}
-                    className="grid grid-cols-3 p-4 items-center text-center transition-colors"
-                    style={{
-                      borderBottom: '1px solid var(--border-default)',
-                      background: idx % 2 === 0 ? 'var(--bg-card)' : 'var(--bg-primary)',
-                    }}
-                  >
-                    <div className="font-arabic text-2xl" style={{ color: getPronounColor(pronoun.person) }}>
-                      {pronoun.arabic}
+          <div className="flex flex-col">
+            <div className="w-full overflow-x-auto snap-x snap-mandatory pb-8 sm:pb-0 hide-scrollbar" style={{ direction: 'rtl' }}>
+              
+              <div className="min-w-[800px] border-[3px] border-[var(--text-primary)] bg-[var(--bg-primary)] grid grid-cols-[80px_1fr] relative">
+                
+                {/* Y-Axis Labels */}
+                <div className="border-l-[3px] border-[var(--text-primary)] flex flex-col">
+                  <div className="h-10 border-b border-[var(--mizan-slate)] bg-[var(--bg-card)]"></div>
+                  {MATRIX.map((block, idx) => (
+                    <div key={idx} className="flex-1 min-h-[300px] border-b last:border-b-0 border-[var(--text-primary)] bg-[var(--bg-card)] flex flex-col justify-center items-center p-2 relative overflow-hidden group">
+                      <div className="absolute inset-0 bg-[var(--mizan-mauve)] opacity-0 group-hover:opacity-10 transition-opacity"></div>
+                      <block.icon className="w-8 h-8 mb-4 opacity-50 group-hover:opacity-100 transition-opacity" style={{ color: 'var(--mizan-mauve)' }} />
+                      <span className="writing-vertical-rl text-xs font-mono font-bold tracking-widest text-[var(--test-primary)] rotate-180 uppercase flex gap-4">
+                        {block.title.split(' ').map((w,i) => <span key={i}>{w}</span>)}
+                      </span>
                     </div>
-                    <div className="font-arabic text-3xl" style={{ color: 'var(--text-primary)' }}>
-                      {conjugated}
+                  ))}
+                </div>
+
+                {/* X-Axis Data */}
+                <div className="flex flex-col w-full">
+                  {/* Headers */}
+                  <div className="h-10 border-b border-[var(--text-primary)] bg-[var(--mizan-deep)] grid text-center sticky top-0 z-10" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', direction: 'ltr' }}>
+                    <div className="border-r border-[var(--text-primary)] flex justify-center items-center text-[var(--mizan-sand)] font-mono text-[10px] uppercase tracking-widest font-black">
+                      <Users className="w-4 h-4 mr-2 hidden md:block" /> المجمع (Plural)
                     </div>
-                    <div style={{ color: 'var(--text-secondary)', fontWeight: 300 }}>
-                      {getRussianVerbTranslation(currentVerb.russian, selectedTense, pronoun.id)}
+                    <div className="border-r border-[var(--text-primary)] flex justify-center items-center text-[var(--mizan-sand)] font-mono text-[10px] uppercase tracking-widest font-black">
+                      <UserPlus className="w-4 h-4 mr-2 hidden md:block" /> المثنى (Dual)
+                    </div>
+                    <div className="flex justify-center items-center text-[var(--mizan-sand)] font-mono text-[10px] uppercase tracking-widest font-black">
+                      <User className="w-4 h-4 mr-2 hidden md:block" /> المفرد (Singular)
                     </div>
                   </div>
-                );
-              })}
+
+                  {/* Matrix Cells */}
+                  <div className="flex flex-col">
+                    {MATRIX.map((block, blockIdx) => (
+                      <div key={blockIdx} className="min-h-[300px] border-b last:border-b-0 border-[var(--text-primary)] flex flex-col bg-[var(--bg-card)]">
+                        {block.rows.map((row, rowIdx) => (
+                          <div key={rowIdx} className="flex-1 grid border-b last:border-b-0 border-[var(--border-default)]" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', direction: 'ltr' }}>
+                            {row.items.map((itemId, itemIdx) => {
+                              if (!itemId) {
+                                return <div key={itemIdx} className="border-r last:border-r-0 border-[var(--border-default)] flex items-center justify-center opacity-10 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,var(--text-primary)_10px,var(--text-primary)_11px)]"></div>;
+                              }
+                              const pronoun = PRONOUNS.find(p => p.id === itemId);
+                              if (!pronoun) return <div key={itemIdx} />;
+                              const conjugated = conjugate(currentVerb, selectedTense, pronoun.id);
+                              
+                              let themeColor = 'var(--text-primary)';
+                              let themeAccent = 'var(--mizan-slate)';
+
+                              if (block.person === 1) {
+                                themeColor = 'var(--text-primary)';
+                                themeAccent = 'var(--mizan-sand)';
+                              } else if (row.gender === 'm') {
+                                themeColor = 'var(--color-info)'; // typically blueish
+                                themeAccent = 'var(--color-info)';
+                              } else if (row.gender === 'f') {
+                                themeColor = 'var(--color-error)'; // pinkish/red 
+                                themeAccent = 'var(--color-error)';
+                              }
+
+                              // Editorial Brutalism Mizan Matrix Cell
+                              return (
+                                <div key={itemIdx} className="snap-center border-r last:border-r-0 border-[var(--border-default)] p-6 flex flex-col justify-between items-center text-center relative group bg-[var(--bg-card)] hover:bg-[var(--mizan-sand)] hover:border-[var(--mizan-deep)] transition-all cursor-pointer">
+                                  
+                                  <div className="w-full flex justify-between items-center mb-4">
+                                    <div className="text-[11px] font-mono tracking-widest text-[var(--mizan-slate)] uppercase opacity-0 group-hover:opacity-100 transition-opacity delay-75">
+                                      {pronoun.id.replace(/_[mf]/, '')}
+                                    </div>
+                                    <div className="font-arabic text-xl opacity-70 group-hover:opacity-100 transition-all font-bold" style={{ color: themeAccent }}>
+                                      {pronoun.arabic}
+                                    </div>
+                                  </div>
+
+                                  <div className="flex-1 flex items-center justify-center py-6 relative z-10 w-full group-hover:scale-110 transition-transform duration-500 ease-out">
+                                    <h3 
+                                      className="font-arabic text-4xl sm:text-5xl md:text-6xl font-black leading-none drop-shadow-sm"
+                                      style={{ color: themeColor }}
+                                    >
+                                      {conjugated}
+                                    </h3>
+                                  </div>
+
+                                  <div className="w-full mt-auto pt-4 border-t border-transparent group-hover:border-[var(--mizan-deep)] transition-colors text-[11px] sm:text-xs font-serif italic text-[var(--mizan-slate)] group-hover:text-[var(--text-primary)]">
+                                    {getRussianVerbTranslation(currentVerb.russian, selectedTense, pronoun.id)}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { POSSESSIVE_PRONOUNS } from '@/data/pronouns';
 import { ArabicText } from '@/components/ArabicText';
+import Link from 'next/link';
 
 function shuffle<T>(array: T[]): T[] {
   const newArr = [...array];
@@ -62,36 +63,27 @@ export default function Pronouns() {
     <div className="max-w-5xl mx-auto space-y-6 animate-fade-slide-up">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <p className="section-label mb-3">Грамматика</p>
-          <h1 className="text-3xl mb-2" style={{ fontWeight: 900, letterSpacing: '-0.02em' }}>
+          <nav className="flex items-center gap-2 text-micro-label mb-4 text-[var(--mizan-slate)]">
+            <Link href="/" className="hover:text-[var(--mizan-mauve)] transition-colors">ГЛАВНАЯ</Link>
+            <span>/</span>
+            <span className="text-[var(--mizan-deep)]">МЕСТОИМЕНИЯ</span>
+          </nav>
+          <h1 className="text-3xl mb-2 heading-display-black text-[var(--text-primary)]">
             Местоимения
           </h1>
-          <p className="font-display" style={{ color: 'var(--mizan-mauve)' }}>Притяжательные суффиксы</p>
+          <p className="font-display text-[var(--mizan-mauve)]">Притяжательные суффиксы</p>
         </div>
 
-        <div className="flex" style={{ border: '1px solid var(--border-default)' }}>
+        <div className="flex border border-[var(--border-default)]">
           <button
             onClick={() => setMode('table')}
-            style={{
-              padding: '10px 20px', fontSize: '11px', fontWeight: 700,
-              textTransform: 'uppercase', letterSpacing: '0.15em',
-              background: mode === 'table' ? 'var(--mizan-mauve)' : 'transparent',
-              color: mode === 'table' ? 'white' : 'var(--text-secondary)',
-              border: 'none', cursor: 'pointer', transition: 'all 300ms ease-in-out',
-            }}
+            className={`tab-btn ${mode === 'table' ? 'active' : 'inactive'}`}
           >
             Справочник
           </button>
           <button
             onClick={() => setMode('practice')}
-            style={{
-              padding: '10px 20px', fontSize: '11px', fontWeight: 700,
-              textTransform: 'uppercase', letterSpacing: '0.15em',
-              background: mode === 'practice' ? 'var(--mizan-mauve)' : 'transparent',
-              color: mode === 'practice' ? 'white' : 'var(--text-secondary)',
-              border: 'none', borderLeft: '1px solid var(--border-default)',
-              cursor: 'pointer', transition: 'all 300ms ease-in-out',
-            }}
+            className={`tab-btn border-l border-[var(--border-default)] ${mode === 'practice' ? 'active' : 'inactive'}`}
           >
             Практика
           </button>
@@ -138,13 +130,8 @@ export default function Pronouns() {
               {filteredPronouns.map((pronoun, idx) => (
                 <div
                   key={pronoun.id}
-                  className="grid grid-cols-3 p-4 items-center text-center transition-colors"
-                  style={{
-                    borderBottom: '1px solid var(--border-default)',
-                    background: idx % 2 === 0 ? 'var(--bg-card)' : 'var(--bg-primary)',
-                  }}
-                >
-                  <div className="font-arabic text-4xl" style={{ color: getGenderColor(pronoun.gender) }}>
+                  className={`grid grid-cols-3 p-4 items-center text-center transition-colors border-b border-[var(--border-default)] ${idx % 2 === 0 ? 'bg-[var(--bg-card)]' : 'bg-[var(--bg-primary)]'}`}
+                >                  <div className="font-arabic text-4xl" style={{ color: getGenderColor(pronoun.gender) }}>
                     {pronoun.suffix}
                   </div>
                   <div className="text-lg" style={{ color: 'var(--text-secondary)' }}>

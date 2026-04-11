@@ -48,27 +48,27 @@ export default function Dashboard() {
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border border-[var(--mizan-deep)] bg-[var(--bg-primary)]">
-          <div className="p-8 border-b md:border-b-0 md:border-r border-[var(--mizan-deep)] flex flex-col items-start">
-            <span className="font-mono text-4xl font-black text-[var(--mizan-sand)] mb-6">01</span>
+          <Link href="/vocabulary" className="block p-8 border-b md:border-b-0 md:border-r border-[var(--mizan-deep)] flex flex-col items-start hover:bg-[var(--mizan-sand)] transition-colors group cursor-pointer text-left">
+            <span className="font-mono text-4xl font-black text-[var(--mizan-sand)] group-hover:text-[var(--mizan-mauve)] transition-colors mb-6">01</span>
             <h2 className="text-xl font-bold uppercase tracking-wider mb-3 text-[var(--text-primary)]">Лексика</h2>
             <p className="font-mono text-xs text-[var(--mizan-slate)] mb-6 leading-relaxed">
               Освойте базовые глаголы и их значения. Формирование словарного запаса — первый шаг.
             </p>
-          </div>
-          <div className="p-8 border-b md:border-b-0 md:border-r border-[var(--mizan-deep)] flex flex-col items-start">
-            <span className="font-mono text-4xl font-black text-[var(--mizan-sand)] mb-6">02</span>
+          </Link>
+          <Link href="/conjugation" className="block p-8 border-b md:border-b-0 md:border-r border-[var(--mizan-deep)] flex flex-col items-start hover:bg-[var(--mizan-sand)] transition-colors group cursor-pointer text-left">
+            <span className="font-mono text-4xl font-black text-[var(--mizan-sand)] group-hover:text-[var(--mizan-mauve)] transition-colors mb-6">02</span>
             <h2 className="text-xl font-bold uppercase tracking-wider mb-3 text-[var(--text-primary)]">Спряжения</h2>
             <p className="font-mono text-xs text-[var(--mizan-slate)] mb-6 leading-relaxed">
-              Практика изменения глаголов по лицам, числам и временам в автоматическом режиме.
+              Теория и практика изменения глаголов. Интерактивные визуальные таблицы времен.
             </p>
-          </div>
-          <div className="p-8 flex flex-col items-start">
-            <span className="font-mono text-4xl font-black text-[var(--mizan-sand)] mb-6">03</span>
+          </Link>
+          <Link href="/quiz" className="block p-8 flex flex-col items-start hover:bg-[var(--mizan-sand)] transition-colors group cursor-pointer text-left">
+            <span className="font-mono text-4xl font-black text-[var(--mizan-sand)] group-hover:text-[var(--mizan-mauve)] transition-colors mb-6">03</span>
             <h2 className="text-xl font-bold uppercase tracking-wider mb-3 text-[var(--text-primary)]">Тесты</h2>
             <p className="font-mono text-xs text-[var(--mizan-slate)] mb-6 leading-relaxed">
               Проверка усвоенного материала через динамически генерируемые опросы.
             </p>
-          </div>
+          </Link>
         </div>
 
         <Link

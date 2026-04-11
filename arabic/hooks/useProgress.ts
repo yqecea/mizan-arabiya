@@ -7,7 +7,7 @@ export function useProgress() {
   const [progress, setProgressState] = useState<ProgressData | null>(null);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- initial load only
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Need to load from localStorage on client
     setProgressState(getProgress());
   }, []);
 

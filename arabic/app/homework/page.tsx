@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { HOMEWORK } from '@/data/homework';
 import { useProgress } from '@/hooks/useProgress';
 import { ArabicText } from '@/components/ArabicText';
+import Link from 'next/link';
 
 export default function Homework() {
   const { progress, updateProgress } = useProgress();
@@ -38,11 +39,15 @@ export default function Homework() {
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-slide-up">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <p className="section-label mb-3">Практика</p>
-          <h1 className="text-3xl mb-2" style={{ fontWeight: 900, letterSpacing: '-0.02em' }}>
+          <nav className="flex flex-wrap items-center gap-2 text-micro-label mb-4 text-[var(--mizan-slate)]">
+            <Link href="/" className="hover:text-[var(--mizan-mauve)] transition-colors">ГЛАВНАЯ</Link>
+            <span className="text-[var(--mizan-sand)]">/</span>
+            <span className="text-[var(--mizan-deep)] uppercase font-mono">ПРАКТИКА</span>
+          </nav>
+          <h1 className="text-3xl mb-2 heading-display-black text-[var(--text-primary)]">
             Домашнее задание
           </h1>
-          <p className="font-display" style={{ color: 'var(--mizan-mauve)' }}>Перевод предложений</p>
+          <p className="font-display text-[var(--mizan-mauve)]">Перевод предложений</p>
         </div>
         <div
           className="px-4 py-2 text-sm"
