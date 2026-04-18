@@ -7,7 +7,7 @@ import { ProgressRing } from '@/components/ProgressRing';
 import { ArabicText } from '@/components/ArabicText';
 import { VERBS } from '@/data/verbs';
 import Link from 'next/link';
-import { BookOpen, Edit3, Type, FileText, ClipboardList } from 'lucide-react';
+import { BookOpen, Edit3, Type, FileText, ClipboardList, GraduationCap, List, BookMarked, Flame, Trophy, Target, ArrowRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export default function Dashboard() {
@@ -16,9 +16,20 @@ export default function Dashboard() {
 
   useEffect(() => {
     const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 1000 / 60 / 60 / 24);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Need to load wordOfDay on client to avoid hydration mismatch
     setWordOfDay(VERBS[dayOfYear % VERBS.length]);
   }, []);
+
+  // All hooks MUST be called before any early returns
+  const recommendedVerb = useMemo(() => {
+    if (!progress) return VERBS[0];
+    const masteredSet = new Set(progress.exam.verbsMastered);
+    const notMastered = VERBS.filter(v => !masteredSet.has(v.id));
+    if (notMastered.length === 0) return VERBS[0];
+    const attemptedSet = new Set(progress.exam.verbsAttempted);
+    const notAttempted = notMastered.filter(v => !attemptedSet.has(v.id));
+    if (notAttempted.length > 0) return notAttempted[0];
+    return notMastered[0];
+  }, [progress]);
 
   if (!progress || !wordOfDay) {
     return (
@@ -30,9 +41,16 @@ export default function Dashboard() {
 
   const vocabProgress = Math.round((progress.vocabulary.known.length / VERBS.length) * 100) || 0;
   const conjProgress = progress.conjugation.total > 0 ? Math.round((progress.conjugation.correct / progress.conjugation.total) * 100) : 0;
-  const quizProgress = progress.quiz.completed > 0 ? 100 : 0;
 
   const isNewUser = vocabProgress === 0 && conjProgress === 0 && progress.quiz.completed === 0;
+
+  // Exam mastery data
+  const masteredCount = progress.exam.verbsMastered.length;
+  const attemptedCount = progress.exam.verbsAttempted.length;
+  const examPercent = Math.round((masteredCount / VERBS.length) * 100);
+
+  // Streak
+  const streakCount = progress.streak.currentStreak;
 
   if (isNewUser) {
     return (
@@ -65,20 +83,20 @@ export default function Dashboard() {
               Теория и практика изменения глаголов. Интерактивные визуальные таблицы времен.
             </p>
           </Link>
-          <Link href="/quiz" className="block p-8 flex flex-col items-start hover:bg-[var(--mizan-sand)] transition-colors group cursor-pointer text-left">
+          <Link href="/exam" className="block p-8 flex flex-col items-start hover:bg-[var(--mizan-sand)] transition-colors group cursor-pointer text-left">
             <span className="font-mono text-4xl font-black text-[var(--mizan-sand)] group-hover:text-[var(--mizan-mauve)] transition-colors mb-6">03</span>
-            <h2 className="text-xl font-bold uppercase tracking-wider mb-3 text-[var(--text-primary)]">Тесты</h2>
+            <h2 className="text-xl font-bold uppercase tracking-wider mb-3 text-[var(--text-primary)]">Экзамен</h2>
             <p className="font-mono text-xs text-[var(--mizan-slate)] mb-6 leading-relaxed">
-              Проверка усвоенного материала через динамически генерируемые опросы.
+              Тренажёр формата экзамена — заполни таблицу спряжений для каждого глагола.
             </p>
           </Link>
         </div>
 
         <Link
-          href="/vocabulary"
+          href="/exam"
           className="block w-full bg-[var(--mizan-deep)] text-[var(--mizan-cream)] text-center py-6 font-mono text-lg uppercase tracking-widest font-bold hover:bg-[var(--mizan-slate)] transition-colors min-h-[48px]"
         >
-          Начать с глаголов
+          Начать подготовку к экзамену
         </Link>
       </div>
     );
@@ -92,26 +110,90 @@ export default function Dashboard() {
 
   const navTiles = [
     { href: '/vocabulary', label: 'Словарь', icon: BookOpen },
+    { href: '/verbs', label: 'Все глаголы', icon: List },
     { href: '/conjugation', label: 'Спряжения', icon: Edit3 },
     { href: '/pronouns', label: 'Местоимения', icon: Type },
+    { href: '/topics', label: 'Темы', icon: BookMarked },
+    { href: '/exam', label: 'Экзамен', icon: GraduationCap },
     { href: '/quiz', label: 'Тест', icon: FileText },
     { href: '/homework', label: 'ДЗ', icon: ClipboardList },
   ];
 
   return (
     <div className="max-w-5xl mx-auto space-y-10 animate-fade-slide-up">
-      <header className="mb-2">
-        <p className="text-micro-label mb-4 flex items-center gap-3">
-          <span className="w-10 h-0.5 bg-[var(--mizan-mauve)] inline-block" />
-          Обзор
-        </p>
-        <h1 className="text-3xl lg:text-4xl mb-2 heading-display-black text-[var(--text-primary)]">
-          Добро пожаловать
-        </h1>
-        <p className="font-display text-lg text-[var(--mizan-mauve)]">
-          Продолжайте изучение арабского языка
-        </p>
+      <header className="mb-2 flex flex-col md:flex-row md:items-start justify-between gap-4">
+        <div>
+          <p className="text-micro-label mb-4 flex items-center gap-3">
+            <span className="w-10 h-0.5 bg-[var(--mizan-mauve)] inline-block" />
+            Обзор
+          </p>
+          <h1 className="text-3xl lg:text-4xl mb-2 heading-display-black text-[var(--text-primary)]">
+            Добро пожаловать
+          </h1>
+          <p className="font-display text-lg text-[var(--mizan-mauve)]">
+            Продолжайте изучение арабского языка
+          </p>
+        </div>
+
+        {/* Streak Badge */}
+        {streakCount > 0 && (
+          <div className="flex items-center gap-3 px-5 py-3 border border-[var(--mizan-deep)] bg-[var(--bg-card)] shadow-[4px_4px_0_0_var(--mizan-sand)]">
+            <Flame className="w-6 h-6 text-[#e67e22]" />
+            <div>
+              <div className="font-mono text-2xl font-black text-[var(--mizan-deep)] leading-none">{streakCount}</div>
+              <div className="font-mono text-[9px] uppercase tracking-widest text-[var(--mizan-slate)]">
+                {streakCount === 1 ? 'день' : streakCount < 5 ? 'дня' : 'дней'} подряд
+              </div>
+            </div>
+          </div>
+        )}
       </header>
+
+      {/* Exam CTA — Primary Call-to-Action */}
+      <Link
+        href="/exam"
+        className="block border-2 border-[var(--mizan-deep)] bg-[var(--bg-card)] p-6 md:p-8 hover:bg-[var(--mizan-sand)] transition-all shadow-[8px_8px_0_0_var(--mizan-sand)] hover:shadow-none hover:translate-y-[8px] hover:translate-x-[8px] group"
+      >
+        <div className="flex flex-col md:flex-row items-center gap-6">
+          <div className="flex-shrink-0 w-16 h-16 flex items-center justify-center bg-[var(--mizan-deep)] text-[var(--mizan-cream)]">
+            <GraduationCap className="w-8 h-8" />
+          </div>
+          <div className="flex-1 text-center md:text-left">
+            <div className="font-mono text-[10px] uppercase tracking-widest text-[var(--mizan-slate)] mb-1">
+              Подготовка к экзамену
+            </div>
+            <div className="text-xl md:text-2xl font-bold uppercase tracking-wide text-[var(--mizan-deep)] mb-2">
+              {masteredCount === VERBS.length
+                ? 'Все глаголы освоены!'
+                : `Продолжить: ${recommendedVerb.russian}`
+              }
+            </div>
+            {/* Progress bar */}
+            <div className="w-full max-w-md mx-auto md:mx-0">
+              <div className="flex items-center gap-3">
+                <div className="flex-1 h-2 bg-[var(--mizan-sand)] border border-[var(--border-default)] overflow-hidden">
+                  <div
+                    className="h-full bg-[var(--mizan-deep)] transition-all duration-500"
+                    style={{ width: `${examPercent}%` }}
+                  />
+                </div>
+                <span className="font-mono text-xs text-[var(--mizan-slate)] flex-shrink-0">
+                  {masteredCount}/{VERBS.length}
+                </span>
+              </div>
+              <div className="flex justify-between mt-1">
+                <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--mizan-slate)]">
+                  <Trophy className="w-3 h-3 inline mr-1" />Освоено: {masteredCount}
+                </span>
+                <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--mizan-slate)]">
+                  <Target className="w-3 h-3 inline mr-1" />Пробовали: {attemptedCount}
+                </span>
+              </div>
+            </div>
+          </div>
+          <ArrowRight className="w-6 h-6 text-[var(--mizan-slate)] group-hover:text-[var(--mizan-deep)] transition-colors flex-shrink-0" />
+        </div>
+      </Link>
 
       {/* Progress Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -168,7 +250,7 @@ export default function Dashboard() {
       </div>
 
       {/* Navigation Tiles */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 stagger-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 stagger-5">
         {navTiles.map((tile) => (
           <Link
             key={tile.href}

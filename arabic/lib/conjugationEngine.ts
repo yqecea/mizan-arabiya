@@ -191,3 +191,161 @@ export function getRussianVerbTranslation(verbRussian: string, tense: Tense, pro
   
   return `${pronoun}${base}`.trim();
 }
+
+// ═══════════════════════════════════════════════
+// IMPERATIVE (AMR) — 2nd person only
+// Pattern: remove present-tense prefix, add hamzat al-wasl if needed
+// ═══════════════════════════════════════════════
+
+const AMR_PATTERNS: Record<string, string> = {
+  anta:    "اُ1ْ2V3ْ",
+  anti:    "اُ1ْ2V3ِي",
+  antuma:  "اُ1ْ2V3َا",
+  antum:   "اُ1ْ2V3ُوا",
+  antunna: "اُ1ْ2V3ْنَ",
+};
+
+export function getAmr(verb: Verb, pronounId: string): string {
+  const rootLetters = verb.root.split('-');
+  if (rootLetters.length !== 3) return '';
+  const pattern = AMR_PATTERNS[pronounId];
+  if (!pattern) return '';
+
+  let result = pattern
+    .replace(/1/g, rootLetters[0])
+    .replace(/2/g, rootLetters[1])
+    .replace(/3/g, rootLetters[2])
+    .replace(/V/g, verb.mudariVowel);
+
+  // If the middle vowel is damma or kasra, the hamza at start takes that vowel
+  if (verb.mudariVowel === 'ُ') {
+    result = result.replace('اُ', 'اُ');
+  } else {
+    result = result.replace('اُ', 'اِ');
+  }
+
+  return result;
+}
+
+// ═══════════════════════════════════════════════
+// PROHIBITION (NAHY) — لا + مجزوم (present with jazm)
+// ═══════════════════════════════════════════════
+
+const NAHY_PATTERNS: Record<string, string> = {
+  huwa:    "لَا يَ1ْ2V3ْ",
+  hiya:    "لَا تَ1ْ2V3ْ",
+  huma_m:  "لَا يَ1ْ2V3َا",
+  huma_f:  "لَا تَ1ْ2V3َا",
+  hum:     "لَا يَ1ْ2V3ُوا",
+  hunna:   "لَا يَ1ْ2V3ْنَ",
+  anta:    "لَا تَ1ْ2V3ْ",
+  anti:    "لَا تَ1ْ2V3ِي",
+  antuma:  "لَا تَ1ْ2V3َا",
+  antum:   "لَا تَ1ْ2V3ُوا",
+  antunna: "لَا تَ1ْ2V3ْنَ",
+  ana:     "لَا أَ1ْ2V3ْ",
+  nahnu:   "لَا نَ1ْ2V3ْ",
+};
+
+export function getNahy(verb: Verb, pronounId: string): string {
+  const rootLetters = verb.root.split('-');
+  if (rootLetters.length !== 3) return '';
+  const pattern = NAHY_PATTERNS[pronounId];
+  if (!pattern) return '';
+
+  return pattern
+    .replace(/1/g, rootLetters[0])
+    .replace(/2/g, rootLetters[1])
+    .replace(/3/g, rootLetters[2])
+    .replace(/V/g, verb.mudariVowel);
+}
+
+// ═══════════════════════════════════════════════
+// NEGATION — Past (ما + past) and Present (لا + present)
+// ═══════════════════════════════════════════════
+
+export function getNegativePast(verb: Verb, pronounId: string): string {
+  const pastForm = conjugate(verb, 'past', pronounId);
+  return `مَا ${pastForm}`;
+}
+
+export function getNegativePresent(verb: Verb, pronounId: string): string {
+  const presentForm = conjugate(verb, 'present', pronounId);
+  return `لَا ${presentForm}`;
+}
+
+// Negation with لَمْ  + مجزوم (past meaning but present form with jazm)
+const LAM_PATTERNS: Record<string, string> = {
+  huwa:    "لَمْ يَ1ْ2V3ْ",
+  hiya:    "لَمْ تَ1ْ2V3ْ",
+  huma_m:  "لَمْ يَ1ْ2V3َا",
+  huma_f:  "لَمْ تَ1ْ2V3َا",
+  hum:     "لَمْ يَ1ْ2V3ُوا",
+  hunna:   "لَمْ يَ1ْ2V3ْنَ",
+  anta:    "لَمْ تَ1ْ2V3ْ",
+  anti:    "لَمْ تَ1ْ2V3ِي",
+  antuma:  "لَمْ تَ1ْ2V3َا",
+  antum:   "لَمْ تَ1ْ2V3ُوا",
+  antunna: "لَمْ تَ1ْ2V3ْنَ",
+  ana:     "لَمْ أَ1ْ2V3ْ",
+  nahnu:   "لَمْ نَ1ْ2V3ْ",
+};
+
+export function getNegativePastLam(verb: Verb, pronounId: string): string {
+  const rootLetters = verb.root.split('-');
+  if (rootLetters.length !== 3) return '';
+  const pattern = LAM_PATTERNS[pronounId];
+  if (!pattern) return '';
+
+  return pattern
+    .replace(/1/g, rootLetters[0])
+    .replace(/2/g, rootLetters[1])
+    .replace(/3/g, rootLetters[2])
+    .replace(/V/g, verb.mudariVowel);
+}
+
+// ═══════════════════════════════════════════════
+// ISM ZAMAN / MAKAN (Place/Time noun)
+// Patterns: مَفْعَل or مَفْعِل
+// ═══════════════════════════════════════════════
+
+export function getIsmZamanMakan(verb: Verb): { mafal: string; mafil: string } {
+  const rootLetters = verb.root.split('-');
+  if (rootLetters.length !== 3) return { mafal: '', mafil: '' };
+  const [r1, r2, r3] = rootLetters;
+  return {
+    mafal: `مَ${r1}ْ${r2}َ${r3}ٌ`,
+    mafil: `مَ${r1}ْ${r2}ِ${r3}ٌ`,
+  };
+}
+
+// ═══════════════════════════════════════════════
+// ISM ALA (Tool/Instrument noun)
+// 3 patterns: مِفْعَل، مِفْعَال، مِفْعَلَة
+// ═══════════════════════════════════════════════
+
+export function getIsmAla(verb: Verb): { mifal: string; mifaal: string; mifalah: string } {
+  const rootLetters = verb.root.split('-');
+  if (rootLetters.length !== 3) return { mifal: '', mifaal: '', mifalah: '' };
+  const [r1, r2, r3] = rootLetters;
+  return {
+    mifal:   `مِ${r1}ْ${r2}َ${r3}ٌ`,
+    mifaal:  `مِ${r1}ْ${r2}َا${r3}ٌ`,
+    mifalah: `مِ${r1}ْ${r2}َ${r3}َةٌ`,
+  };
+}
+
+// ═══════════════════════════════════════════════
+// ISM TAFDIL (Superlative/Comparative)
+// Masculine: أَفْعَل  |  Feminine: فُعْلَى
+// ═══════════════════════════════════════════════
+
+export function getIsmTafdil(verb: Verb): { male: string; female: string } {
+  const rootLetters = verb.root.split('-');
+  if (rootLetters.length !== 3) return { male: '', female: '' };
+  const [r1, r2, r3] = rootLetters;
+  return {
+    male:   `أَ${r1}ْ${r2}َ${r3}ُ`,
+    female: `${r1}ُ${r2}ْ${r3}َى`,
+  };
+}

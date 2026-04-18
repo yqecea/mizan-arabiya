@@ -3,14 +3,17 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { Home, BookOpen, Edit3, Type, FileText, ClipboardList, Menu, X } from 'lucide-react';
+import { Home, BookOpen, Edit3, Type, FileText, ClipboardList, Menu, X, GraduationCap, List, BookMarked } from 'lucide-react';
 import { MizanProductLogo, MizanLogo } from '@/components/MizanLogo';
 
 const navItems = [
   { href: '/', label: 'Главная', icon: Home },
   { href: '/vocabulary', label: 'Словарь', icon: BookOpen },
+  { href: '/verbs', label: 'Все глаголы', icon: List },
   { href: '/conjugation', label: 'Спряжения', icon: Edit3 },
   { href: '/pronouns', label: 'Местоимения', icon: Type },
+  { href: '/topics', label: 'Темы', icon: BookMarked },
+  { href: '/exam', label: 'Экзамен', icon: GraduationCap },
   { href: '/quiz', label: 'Тест', icon: FileText },
   { href: '/homework', label: 'ДЗ', icon: ClipboardList },
 ];

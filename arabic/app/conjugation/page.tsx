@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { VERBS } from '@/data/verbs';
 import { PRONOUNS } from '@/data/conjugations';
 import { conjugate, Tense, getRussianVerbTranslation } from '@/lib/conjugationEngine';
@@ -47,10 +48,18 @@ function shuffle<T>(array: T[]): T[] {
   return newArr;
 }
 
-export default function Conjugation() {
+function ConjugationContent() {
   const { updateProgress } = useProgress();
+  const searchParams = useSearchParams();
   const [mode, setMode] = useState<'table' | 'practice'>('table');
-  const [selectedVerbId, setSelectedVerbId] = useState(VERBS[0].id);
+
+  // Read verb from query param: /conjugation?verb=5
+  const verbIdFromUrl = searchParams.get('verb');
+  const initialVerbId = verbIdFromUrl
+    ? Number(verbIdFromUrl)
+    : VERBS[0].id;
+
+  const [selectedVerbId, setSelectedVerbId] = useState(initialVerbId);
   const [selectedTense, setSelectedTense] = useState<Tense>('past');
 
   function generatePractice() {
@@ -60,25 +69,39 @@ export default function Conjugation() {
     const correct = conjugate(verb, tense, pronoun.id);
 
     const distractors = new Set<string>();
-    while (distractors.size < 3) {
+    let attempts = 0;
+    while (distractors.size < 3 && attempts < 100) {
       const randomPronoun = PRONOUNS[Math.floor(Math.random() * PRONOUNS.length)];
-      if (randomPronoun.id !== pronoun.id) {
-        distractors.add(conjugate(verb, tense, randomPronoun.id));
+      const distractorText = conjugate(verb, tense, randomPronoun.id);
+      if (distractorText !== correct) {
+        distractors.add(distractorText);
       }
+      attempts++;
     }
 
     const options = shuffle([correct, ...Array.from(distractors)]);
     return { verb, tense, pronoun, correct, options };
   }
 
-  const [practiceQuestion, setPracticeQuestion] = useState(() => generatePractice());
+  const [practiceQuestion, setPracticeQuestion] = useState<{
+    verb: typeof VERBS[0];
+    tense: Tense;
+    pronoun: typeof PRONOUNS[0];
+    correct: string;
+    options: string[];
+  } | null>(null);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Hydration mismatch fix
+    setPracticeQuestion(generatePractice());
+  }, []);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
 
   const currentVerb = VERBS.find(v => v.id === selectedVerbId) || VERBS[0];
 
   const handleAnswer = (option: string) => {
-    if (selectedAnswer !== null) return;
+    if (selectedAnswer !== null || !practiceQuestion) return;
     setSelectedAnswer(option);
     const correct = option === practiceQuestion.correct;
     setIsCorrect(correct);
@@ -119,7 +142,7 @@ export default function Conjugation() {
             <span className="text-[var(--mizan-sand)]">/</span>
             <span className="text-[var(--mizan-deep)]">СПРЯЖЕНИЯ</span>
             <span className="text-[var(--mizan-sand)]">/</span>
-            <span className="text-[var(--mizan-deep)] uppercase font-mono">{mode === 'table' ? currentVerb.root : practiceQuestion.verb.root}</span>
+            <span className="text-[var(--mizan-deep)] uppercase font-mono">{mode === 'table' ? currentVerb.root : practiceQuestion?.verb.root ?? '...'}</span>
           </nav>
           <h1 className="text-3xl mb-2 heading-display-black text-[var(--text-primary)]">
             Спряжения
@@ -193,7 +216,7 @@ export default function Conjugation() {
           </div>
 
           <div className="flex flex-col">
-            <div className="w-full overflow-x-auto snap-x snap-mandatory pb-8 sm:pb-0 hide-scrollbar" style={{ direction: 'rtl' }}>
+            <div className="w-full overflow-x-auto pb-8 sm:pb-0 hide-scrollbar" style={{ direction: 'rtl' }}>
               
               <div className="min-w-[800px] border-[3px] border-[var(--text-primary)] bg-[var(--bg-primary)] grid grid-cols-[80px_1fr] relative">
                 
@@ -201,12 +224,17 @@ export default function Conjugation() {
                 <div className="border-l-[3px] border-[var(--text-primary)] flex flex-col">
                   <div className="h-10 border-b border-[var(--mizan-slate)] bg-[var(--bg-card)]"></div>
                   {MATRIX.map((block, idx) => (
-                    <div key={idx} className="flex-1 min-h-[300px] border-b last:border-b-0 border-[var(--text-primary)] bg-[var(--bg-card)] flex flex-col justify-center items-center p-2 relative overflow-hidden group">
+                    <div key={idx} className="flex-1 min-h-[300px] border-b last:border-b-0 border-[var(--text-primary)] bg-[var(--bg-card)] flex justify-center items-center relative overflow-hidden group">
                       <div className="absolute inset-0 bg-[var(--mizan-mauve)] opacity-0 group-hover:opacity-10 transition-opacity"></div>
-                      <block.icon className="w-8 h-8 mb-4 opacity-50 group-hover:opacity-100 transition-opacity" style={{ color: 'var(--mizan-mauve)' }} />
-                      <span className="writing-vertical-rl text-xs font-mono font-bold tracking-widest text-[var(--test-primary)] rotate-180 uppercase flex gap-4">
-                        {block.title.split(' ').map((w,i) => <span key={i}>{w}</span>)}
-                      </span>
+                      
+                      {/* Rotated Container for Text & Icon */}
+                      <div className="flex items-center gap-4 -rotate-90 whitespace-nowrap pointer-events-none" style={{ direction: 'ltr' }}>
+                        <span className="text-[10px] sm:text-[11px] font-mono font-bold tracking-widest text-[var(--text-primary)] uppercase">
+                          {block.title}
+                        </span>
+                        <block.icon className="w-5 h-5 opacity-50 group-hover:opacity-100 transition-opacity rotate-90" style={{ color: 'var(--mizan-mauve)' }} />
+                      </div>
+
                     </div>
                   ))}
                 </div>
@@ -216,13 +244,13 @@ export default function Conjugation() {
                   {/* Headers */}
                   <div className="h-10 border-b border-[var(--text-primary)] bg-[var(--mizan-deep)] grid text-center sticky top-0 z-10" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', direction: 'ltr' }}>
                     <div className="border-r border-[var(--text-primary)] flex justify-center items-center text-[var(--mizan-sand)] font-mono text-[10px] uppercase tracking-widest font-black">
-                      <Users className="w-4 h-4 mr-2 hidden md:block" /> المجمع (Plural)
+                      <Users className="w-4 h-4 mr-2 hidden md:block" /> Мн. ч. (Plural)
                     </div>
                     <div className="border-r border-[var(--text-primary)] flex justify-center items-center text-[var(--mizan-sand)] font-mono text-[10px] uppercase tracking-widest font-black">
-                      <UserPlus className="w-4 h-4 mr-2 hidden md:block" /> المثنى (Dual)
+                      <UserPlus className="w-4 h-4 mr-2 hidden md:block" /> Дв. ч. (Dual)
                     </div>
                     <div className="flex justify-center items-center text-[var(--mizan-sand)] font-mono text-[10px] uppercase tracking-widest font-black">
-                      <User className="w-4 h-4 mr-2 hidden md:block" /> المفرد (Singular)
+                      <User className="w-4 h-4 mr-2 hidden md:block" /> Ед. ч. (Singular)
                     </div>
                   </div>
 
@@ -256,7 +284,7 @@ export default function Conjugation() {
 
                               // Editorial Brutalism Mizan Matrix Cell
                               return (
-                                <div key={itemIdx} className="snap-center border-r last:border-r-0 border-[var(--border-default)] p-6 flex flex-col justify-between items-center text-center relative group bg-[var(--bg-card)] hover:bg-[var(--mizan-sand)] hover:border-[var(--mizan-deep)] transition-all cursor-pointer">
+                                <div key={itemIdx} className="border-r last:border-r-0 border-[var(--border-default)] p-6 flex flex-col justify-between items-center text-center relative group bg-[var(--bg-card)] hover:bg-[var(--mizan-sand)] hover:border-[var(--mizan-deep)] transition-all cursor-pointer snap-center">
                                   
                                   <div className="w-full flex justify-between items-center mb-4">
                                     <div className="text-[11px] font-mono tracking-widest text-[var(--mizan-slate)] uppercase opacity-0 group-hover:opacity-100 transition-opacity delay-75">
@@ -293,7 +321,7 @@ export default function Conjugation() {
             </div>
           </div>
         </div>
-      ) : (
+      ) : practiceQuestion ? (
         <div className="max-w-2xl mx-auto mt-12">
           <div className="card-static p-8 text-center">
             <div className="mb-8 space-y-4">
@@ -369,7 +397,19 @@ export default function Conjugation() {
             )}
           </div>
         </div>
-      )}
+      ) : null}
     </div>
+  );
+}
+
+export default function Conjugation() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-[50vh] flex items-center justify-center font-mono text-sm uppercase tracking-widest text-[var(--mizan-deep)]">
+        [ LOADING... ]
+      </div>
+    }>
+      <ConjugationContent />
+    </Suspense>
   );
 }
