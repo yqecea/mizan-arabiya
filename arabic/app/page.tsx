@@ -8,15 +8,22 @@ import { ArabicText } from '@/components/ArabicText';
 import { VERBS } from '@/data/verbs';
 import Link from 'next/link';
 import { BookOpen, Edit3, Type, FileText, ClipboardList, GraduationCap, List, BookMarked, Flame, Trophy, Target, ArrowRight } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 export default function Dashboard() {
   const { progress } = useProgress();
   const [wordOfDay, setWordOfDay] = useState<typeof VERBS[0] | null>(null);
+  const [onboarded, setOnboarded] = useState(true); // default true to avoid flash
 
   useEffect(() => {
     const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 1000 / 60 / 60 / 24);
     setWordOfDay(VERBS[dayOfYear % VERBS.length]);
+    setOnboarded(localStorage.getItem('mizan_onboarded') === 'true');
+  }, []);
+
+  const handleContinue = useCallback(() => {
+    localStorage.setItem('mizan_onboarded', 'true');
+    setOnboarded(true);
   }, []);
 
   // All hooks MUST be called before any early returns
@@ -42,7 +49,7 @@ export default function Dashboard() {
   const vocabProgress = Math.round((progress.vocabulary.known.length / VERBS.length) * 100) || 0;
   const conjProgress = progress.conjugation.total > 0 ? Math.round((progress.conjugation.correct / progress.conjugation.total) * 100) : 0;
 
-  const isNewUser = vocabProgress === 0 && conjProgress === 0 && progress.quiz.completed === 0;
+  const isNewUser = !onboarded && vocabProgress === 0 && conjProgress === 0 && progress.quiz.completed === 0;
 
   // Exam mastery data
   const masteredCount = progress.exam.verbsMastered.length;
@@ -59,7 +66,7 @@ export default function Dashboard() {
           <p className="font-mono text-xs uppercase tracking-widest text-[var(--mizan-slate)] mb-4">
             Система инициализирована
           </p>
-          <h1 className="text-5xl lg:text-7xl font-black uppercase tracking-tight text-[var(--mizan-deep)] mb-4 leading-none">
+          <h1 className="text-3xl lg:text-5xl font-black uppercase tracking-tight text-[var(--mizan-deep)] mb-4 leading-none">
             Арабский<br />
             <span className="text-[var(--mizan-mauve)]">Тренер</span>
           </h1>
@@ -92,12 +99,12 @@ export default function Dashboard() {
           </Link>
         </div>
 
-        <Link
-          href="/exam"
-          className="block w-full bg-[var(--mizan-deep)] text-[var(--mizan-cream)] text-center py-6 font-mono text-lg uppercase tracking-widest font-bold hover:bg-[var(--mizan-slate)] transition-colors min-h-[48px] rounded-[var(--radius-md)]"
+        <button
+          onClick={handleContinue}
+          className="block w-full bg-[var(--mizan-deep)] text-[var(--mizan-cream)] text-center py-6 font-mono text-lg uppercase tracking-widest font-bold hover:bg-[var(--mizan-slate)] transition-colors min-h-[48px] rounded-[var(--radius-md)] cursor-pointer"
         >
-          Начать подготовку к экзамену
-        </Link>
+          Продолжить к обучению →
+        </button>
       </div>
     );
   }
@@ -152,7 +159,7 @@ export default function Dashboard() {
       {/* Exam CTA — Primary Call-to-Action */}
       <Link
         href="/exam"
-        className="block border border-[var(--border-strong)] bg-[var(--bg-card)] p-6 md:p-8 hover:bg-[var(--bg-card-hover)] transition-all rounded-[var(--radius-md)] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-hover)] group"
+        className="block border border-[var(--border-strong)] bg-[var(--bg-card)] p-5 md:p-8 hover:bg-[var(--bg-card-hover)] transition-all rounded-[var(--radius-md)] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-hover)] group"
       >
         <div className="flex flex-col md:flex-row items-center gap-6">
           <div className="flex-shrink-0 w-16 h-16 flex items-center justify-center bg-[var(--mizan-deep)] text-[var(--mizan-cream)]">
@@ -227,7 +234,7 @@ export default function Dashboard() {
         </h2>
         <div className="flex flex-col md:flex-row items-center gap-8">
           <div className="text-center md:text-right flex-1">
-            <ArabicText className="text-6xl block mb-2 text-[var(--mizan-deep)]">
+            <ArabicText className="text-4xl md:text-6xl block mb-2 text-[var(--mizan-deep)]">
               {wordOfDay.arabic}
             </ArabicText>
             <p className="font-display text-lg text-[var(--mizan-mauve)]">
@@ -255,7 +262,7 @@ export default function Dashboard() {
           <Link
             key={tile.href}
             href={tile.href}
-            className="card-telemetry p-6 flex flex-col items-center justify-center text-center gap-3 hover:bg-[var(--mizan-sand)] transition-colors min-h-[48px]"
+            className="card-telemetry p-4 md:p-6 flex flex-col items-center justify-center text-center gap-3 hover:bg-[var(--mizan-sand)] transition-colors min-h-[48px]"
             aria-label={`Перейти в ${tile.label}`}
           >
             <div className="w-12 h-12 flex items-center justify-center bg-[var(--mauve-10)] text-[var(--mizan-mauve)] rounded-none">
