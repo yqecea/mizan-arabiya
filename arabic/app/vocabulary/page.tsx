@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { VERBS } from '@/data/verbs';
 import { useProgress } from '@/hooks/useProgress';
 import { ArabicText } from '@/components/ArabicText';
-import { getBab } from '@/lib/conjugationEngine';
+import { getBabInfo } from '@/lib/conjugationEngine';
 import Link from 'next/link';
 
 export default function Vocabulary() {
@@ -97,15 +97,27 @@ export default function Vocabulary() {
           </div>
           <div>
             <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--mizan-slate)] mb-2">
-              Баб
+              Баб (огласовки)
             </div>
-            <div className="font-display italic text-2xl text-[var(--mizan-deep)]">
-              {getBab(currentVerb)}
+            <div className="flex flex-col gap-1">
+              <span
+                className="inline-block px-2 py-0.5 font-mono text-base font-bold rounded-sm"
+                style={{
+                  color: `var(--bab-${getBabInfo(currentVerb).number})`,
+                  border: `1px solid var(--bab-${getBabInfo(currentVerb).number})`,
+                  background: `color-mix(in srgb, var(--bab-${getBabInfo(currentVerb).number}) 8%, transparent)`,
+                }}
+              >
+                {getBabInfo(currentVerb).number} — {getBabInfo(currentVerb).vowelLabel}
+              </span>
+              <span className="font-arabic text-sm text-[var(--mizan-slate)]">
+                {getBabInfo(currentVerb).arabicPattern}
+              </span>
             </div>
           </div>
           <div>
             <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--mizan-slate)] mb-2">
-              Настоящее
+              Настоящее (المضارع)
             </div>
             <ArabicText className="text-2xl text-[var(--mizan-slate)]">
               {currentVerb.mudari}
@@ -113,7 +125,7 @@ export default function Vocabulary() {
           </div>
           <div>
             <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--mizan-slate)] mb-2">
-              Пассив
+              Пассив (المجهول)
             </div>
             <ArabicText className="text-2xl text-[var(--mizan-slate)]">
               {currentVerb.passivePast}

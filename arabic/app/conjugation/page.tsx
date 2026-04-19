@@ -120,11 +120,11 @@ function ConjugationContent() {
     setPracticeQuestion(generatePractice());
   };
 
-  const tenseName: Record<string, string> = {
-    past: 'الماضي المعلوم',
-    present: 'المضارع المعلوم',
-    passive_past: 'الماضي المجهول',
-    passive_present: 'المضارع المجهول'
+  const tenseName: Record<string, { arabic: string; russian: string }> = {
+    past: { arabic: 'الماضي المعلوم', russian: 'Прошедшее' },
+    present: { arabic: 'المضارع المعلوم', russian: 'Настоящее' },
+    passive_past: { arabic: 'الماضي المجهول', russian: 'Пассив прош.' },
+    passive_present: { arabic: 'المضارع المجهول', russian: 'Пассив наст.' },
   };
 
   const getPronounColor = (person: number) => {
@@ -198,17 +198,19 @@ function ConjugationContent() {
                   <button
                     key={t}
                     onClick={() => setSelectedTense(t)}
-                    className="font-arabic text-sm sm:text-base"
+                    className="flex flex-col items-center gap-0.5"
                     style={{
-                      padding: '8px 4px',
+                      padding: '10px 6px',
                       background: selectedTense === t ? 'var(--mizan-mauve)' : 'var(--bg-card)',
                       color: selectedTense === t ? 'white' : 'var(--text-primary)',
-                      border: selectedTense === t ? 'none' : '1px solid var(--border-default)',
+                      border: selectedTense === t ? '1px solid var(--mizan-mauve)' : '1px solid var(--border-default)',
+                      borderRadius: 'var(--radius-sm)',
                       cursor: 'pointer',
-                      transition: 'all 300ms ease-in-out',
+                      transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)',
                     }}
                   >
-                    {tenseName[t]}
+                    <span className="font-arabic text-sm sm:text-base">{tenseName[t].arabic}</span>
+                    <span className="font-mono text-[9px] uppercase tracking-wider" style={{ opacity: selectedTense === t ? 0.85 : 0.5 }}>{tenseName[t].russian}</span>
                   </button>
                 ))}
               </div>
@@ -216,15 +218,51 @@ function ConjugationContent() {
           </div>
 
           <div className="flex flex-col">
-            <div className="w-full overflow-x-auto pb-8 sm:pb-0 hide-scrollbar" style={{ direction: 'rtl' }}>
+            {/* Mobile: Stacked pronoun-form cards */}
+            <div className="md:hidden space-y-4">
+              {MATRIX.map((block, blockIdx) => (
+                <div key={blockIdx} className="bg-[var(--bg-card)] border border-[var(--border-default)] rounded-[var(--radius-md)] overflow-hidden">
+                  <div className="flex items-center gap-2 px-4 py-3 bg-[var(--mizan-deep)] text-[var(--mizan-cream)]">
+                    <block.icon className="w-4 h-4 opacity-70" />
+                    <span className="font-mono text-[11px] uppercase tracking-widest font-bold">{block.title}</span>
+                  </div>
+                  <div className="divide-y divide-[var(--border-default)]">
+                    {block.rows.map((row, rowIdx) => (
+                      row.items.filter(Boolean).map((itemId, itemIdx) => {
+                        if (!itemId) return null;
+                        const pronoun = PRONOUNS.find(p => p.id === itemId);
+                        if (!pronoun) return null;
+                        const conjugated = conjugate(currentVerb, selectedTense, pronoun.id);
+                        const translation = getRussianVerbTranslation(currentVerb.russian, selectedTense, pronoun.id);
+                        return (
+                          <div key={`${rowIdx}-${itemIdx}`} className="flex items-center justify-between px-4 py-3 hover:bg-[var(--mauve-5)] transition-colors">
+                            <div className="flex items-center gap-3">
+                              <ArabicText className="text-lg text-[var(--mizan-slate)] font-bold w-12 text-right">{pronoun.arabic}</ArabicText>
+                              <span className="font-mono text-[9px] uppercase text-[var(--mizan-grey)]">{pronoun.id.replace(/_[mf]/, '')}</span>
+                            </div>
+                            <div className="flex flex-col items-end gap-0.5">
+                              <ArabicText className="text-2xl font-black text-[var(--mizan-deep)]">{conjugated}</ArabicText>
+                              <span className="font-serif italic text-[11px] text-[var(--mizan-slate)]">{translation}</span>
+                            </div>
+                          </div>
+                        );
+                      })
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop: Full matrix grid */}
+            <div className="hidden md:block w-full overflow-x-auto pb-8 sm:pb-0 hide-scrollbar" style={{ direction: 'rtl' }}>
               
-              <div className="min-w-[800px] border-[3px] border-[var(--text-primary)] bg-[var(--bg-primary)] grid grid-cols-[80px_1fr] relative">
+              <div className="min-w-[800px] border border-[var(--border-strong)] bg-[var(--bg-primary)] grid grid-cols-[80px_1fr] relative rounded-[var(--radius-md)] overflow-hidden">
                 
                 {/* Y-Axis Labels */}
-                <div className="border-l-[3px] border-[var(--text-primary)] flex flex-col">
+                <div className="border-l border-[var(--border-strong)] flex flex-col">
                   <div className="h-10 border-b border-[var(--mizan-slate)] bg-[var(--bg-card)]"></div>
                   {MATRIX.map((block, idx) => (
-                    <div key={idx} className="flex-1 min-h-[300px] border-b last:border-b-0 border-[var(--text-primary)] bg-[var(--bg-card)] flex justify-center items-center relative overflow-hidden group">
+                    <div key={idx} className="flex-1 min-h-[300px] border-b last:border-b-0 border-[var(--border-strong)] bg-[var(--bg-card)] flex justify-center items-center relative overflow-hidden group">
                       <div className="absolute inset-0 bg-[var(--mizan-mauve)] opacity-0 group-hover:opacity-10 transition-opacity"></div>
                       
                       {/* Rotated Container for Text & Icon */}
@@ -242,11 +280,11 @@ function ConjugationContent() {
                 {/* X-Axis Data */}
                 <div className="flex flex-col w-full">
                   {/* Headers */}
-                  <div className="h-10 border-b border-[var(--text-primary)] bg-[var(--mizan-deep)] grid text-center sticky top-0 z-10" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', direction: 'ltr' }}>
-                    <div className="border-r border-[var(--text-primary)] flex justify-center items-center text-[var(--mizan-sand)] font-mono text-[10px] uppercase tracking-widest font-black">
+                  <div className="h-10 border-b border-[var(--border-strong)] bg-[var(--mizan-deep)] grid text-center sticky top-0 z-10" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', direction: 'ltr' }}>
+                    <div className="border-r border-[rgba(255,255,255,0.1)] flex justify-center items-center text-[var(--mizan-sand)] font-mono text-[10px] uppercase tracking-widest font-black">
                       <Users className="w-4 h-4 mr-2 hidden md:block" /> Мн. ч. (Plural)
                     </div>
-                    <div className="border-r border-[var(--text-primary)] flex justify-center items-center text-[var(--mizan-sand)] font-mono text-[10px] uppercase tracking-widest font-black">
+                    <div className="border-r border-[rgba(255,255,255,0.1)] flex justify-center items-center text-[var(--mizan-sand)] font-mono text-[10px] uppercase tracking-widest font-black">
                       <UserPlus className="w-4 h-4 mr-2 hidden md:block" /> Дв. ч. (Dual)
                     </div>
                     <div className="flex justify-center items-center text-[var(--mizan-sand)] font-mono text-[10px] uppercase tracking-widest font-black">
@@ -257,7 +295,7 @@ function ConjugationContent() {
                   {/* Matrix Cells */}
                   <div className="flex flex-col">
                     {MATRIX.map((block, blockIdx) => (
-                      <div key={blockIdx} className="min-h-[300px] border-b last:border-b-0 border-[var(--text-primary)] flex flex-col bg-[var(--bg-card)]">
+                      <div key={blockIdx} className="min-h-[300px] border-b last:border-b-0 border-[var(--border-strong)] flex flex-col bg-[var(--bg-card)]">
                         {block.rows.map((row, rowIdx) => (
                           <div key={rowIdx} className="flex-1 grid border-b last:border-b-0 border-[var(--border-default)]" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', direction: 'ltr' }}>
                             {row.items.map((itemId, itemIdx) => {
@@ -275,14 +313,13 @@ function ConjugationContent() {
                                 themeColor = 'var(--text-primary)';
                                 themeAccent = 'var(--mizan-sand)';
                               } else if (row.gender === 'm') {
-                                themeColor = 'var(--color-info)'; // typically blueish
+                                themeColor = 'var(--color-info)';
                                 themeAccent = 'var(--color-info)';
                               } else if (row.gender === 'f') {
-                                themeColor = 'var(--color-error)'; // pinkish/red 
+                                themeColor = 'var(--color-error)';
                                 themeAccent = 'var(--color-error)';
                               }
 
-                              // Editorial Brutalism Mizan Matrix Cell
                               return (
                                 <div key={itemIdx} className="border-r last:border-r-0 border-[var(--border-default)] p-6 flex flex-col justify-between items-center text-center relative group bg-[var(--bg-card)] hover:bg-[var(--mizan-sand)] hover:border-[var(--mizan-deep)] transition-all cursor-pointer snap-center">
                                   
@@ -329,7 +366,7 @@ function ConjugationContent() {
                 className="inline-block px-4 py-1 text-sm font-arabic"
                 style={{ background: 'var(--mizan-sand)', border: '1px solid var(--border-default)', color: 'var(--text-secondary)' }}
               >
-                {tenseName[practiceQuestion.tense]}
+                {tenseName[practiceQuestion.tense].arabic} — {tenseName[practiceQuestion.tense].russian}
               </div>
               <div className="flex justify-center items-center gap-4 text-4xl">
                 <ArabicText style={{ color: 'var(--mizan-deep)' }}>{practiceQuestion.verb.arabic}</ArabicText>

@@ -47,7 +47,7 @@ export const VERBS: Verb[] = [
   { id: 33, arabic: "حَجَبَ", root: "ح-ج-ب", transliteration: "ḥajaba", russian: "скрыл", mudari: "يَحْجُبُ", mudariVowel: "ُ", passivePast: "حُجِبَ", passivePresent: "يُحْجَبُ" },
   { id: 34, arabic: "كَثُرَ", root: "ك-ث-ر", transliteration: "kathura", russian: "был многочисленным", mudari: "يَكْثُرُ", mudariVowel: "ُ", pastVowel: "ُ", passivePast: "كُثِرَ", passivePresent: "يُكْثَرُ" },
   { id: 35, arabic: "خَشَعَ", root: "خ-ش-ع", transliteration: "khashaʿa", russian: "был смиренным", mudari: "يَخْشَعُ", mudariVowel: "َ", passivePast: "خُشِعَ", passivePresent: "يُخْشَعُ" },
-  { id: 36, arabic: "نَصَبَ", root: "ن-ص-ب", transliteration: "naṣaba", russian: "трудился, утомлялся", mudari: "يَنْصَبُ", mudariVowel: "َ", passivePast: "نُصِبَ", passivePresent: "يُنْصَبُ" },
+  { id: 36, arabic: "نَصِبَ", root: "ن-ص-ب", transliteration: "naṣiba", russian: "трудился, утомлялся", mudari: "يَنْصَبُ", mudariVowel: "َ", pastVowel: "ِ", passivePast: "نُصِبَ", passivePresent: "يُنْصَبُ" },
   { id: 37, arabic: "نَعِمَ", root: "ن-ع-م", transliteration: "naʿima", russian: "наслаждался, был в благополучии", mudari: "يَنْعَمُ", mudariVowel: "َ", pastVowel: "ِ", passivePast: "نُعِمَ", passivePresent: "يُنْعَمُ" },
   { id: 38, arabic: "حَسَدَ", root: "ح-س-د", transliteration: "ḥasada", russian: "завидовал", mudari: "يَحْسُدُ", mudariVowel: "ُ", passivePast: "حُسِدَ", passivePresent: "يُحْسَدُ" },
   { id: 39, arabic: "مَنَعَ", root: "م-ن-ع", transliteration: "manaʿa", russian: "запретил, воспрепятствовал", mudari: "يَمْنَعُ", mudariVowel: "َ", passivePast: "مُنِعَ", passivePresent: "يُمْنَعُ" },

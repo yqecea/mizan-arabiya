@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { VERBS } from '@/data/verbs';
-import { getBab } from '@/lib/conjugationEngine';
+import { getBabInfo, type BabInfo } from '@/lib/conjugationEngine';
 import { useProgress } from '@/hooks/useProgress';
 import { ArabicText } from '@/components/ArabicText';
 import Link from 'next/link';
@@ -30,7 +30,7 @@ export default function VerbsTable() {
   const attemptedSet = useMemo(() => new Set(progress.exam.verbsAttempted), [progress.exam.verbsAttempted]);
 
   const verbsWithBab = useMemo(() =>
-    VERBS.map(v => ({ ...v, bab: getBab(v) })),
+    VERBS.map(v => ({ ...v, babInfo: getBabInfo(v), bab: `${getBabInfo(v).number} — ${getBabInfo(v).vowelLabel}` })),
     []
   );
 
@@ -62,7 +62,7 @@ export default function VerbsTable() {
   const babCounts = useMemo(() => {
     const counts: Record<string, number> = { all: verbsWithBab.length };
     verbsWithBab.forEach(v => {
-      const babNum = v.bab.charAt(0);
+      const babNum = String(v.babInfo.number);
       counts[babNum] = (counts[babNum] || 0) + 1;
     });
     return counts;
@@ -124,32 +124,33 @@ export default function VerbsTable() {
             />
           </div>
           <div className="flex items-center gap-2 overflow-x-auto pb-2">
-            <Filter className="w-4 h-4 text-[var(--mizan-slate)] flex-shrink-0" />
+            <div className="flex flex-wrap gap-2 sm:gap-3">
             {ALL_BABS.map(bab => (
               <button
                 key={bab.key}
                 onClick={() => setSelectedBab(bab.key)}
-                className="flex-shrink-0 font-mono text-[10px] uppercase tracking-widest px-3 py-2 border transition-all whitespace-nowrap"
+                className="font-mono text-xs sm:text-[10px] uppercase tracking-wider px-3 sm:px-4 py-2.5 sm:py-2 transition-all rounded-[var(--radius-sm)] min-h-[44px] sm:min-h-0"
                 style={{
                   background: selectedBab === bab.key ? 'var(--mizan-deep)' : 'var(--bg-card)',
                   color: selectedBab === bab.key ? 'var(--mizan-cream)' : 'var(--text-secondary)',
                   borderColor: selectedBab === bab.key ? 'var(--mizan-deep)' : 'var(--border-default)',
+                  border: '1px solid'
                 }}
               >
                 {bab.label}
                 <span className="ml-1 opacity-60">({babCounts[bab.key] || 0})</span>
               </button>
             ))}
+            </div>
           </div>
         </div>
 
-        {/* Status filter */}
         <div className="flex gap-2 overflow-x-auto">
           {statusFilters.map(f => (
             <button
               key={f.key}
               onClick={() => setStatusFilter(f.key)}
-              className="flex-shrink-0 font-mono text-[10px] uppercase tracking-widest px-3 py-2 border transition-all whitespace-nowrap"
+              className="flex-shrink-0 font-mono text-[10px] uppercase tracking-widest px-3 py-2 border transition-all whitespace-nowrap min-h-[44px]"
               style={{
                 background: statusFilter === f.key ? 'var(--mizan-mauve)' : 'var(--bg-card)',
                 color: statusFilter === f.key ? 'white' : 'var(--text-secondary)',
@@ -162,8 +163,7 @@ export default function VerbsTable() {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="w-full overflow-x-auto border border-[var(--mizan-deep)] bg-[var(--bg-card)]">
+      <div className="hidden md:block overflow-x-auto border border-[var(--border-default)] rounded-[var(--radius-md)] bg-[var(--bg-card)]">
         <table className="w-full min-w-[900px]">
           <thead>
             <tr className="bg-[var(--mizan-deep)] text-[var(--mizan-sand)]">
@@ -174,81 +174,36 @@ export default function VerbsTable() {
               <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-widest border-r border-[rgba(255,255,255,0.1)]">Транскрипция</th>
               <th className="px-4 py-3 text-left font-mono text-[10px] uppercase tracking-widest border-r border-[rgba(255,255,255,0.1)]">Перевод</th>
               <th className="px-4 py-3 text-right font-mono text-[10px] uppercase tracking-widest border-r border-[rgba(255,255,255,0.1)]">Настоящее</th>
-              <th className="px-4 py-3 text-center font-mono text-[10px] uppercase tracking-widest">Баб</th>
+              <th className="px-4 py-3 text-center font-mono text-[10px] uppercase tracking-widest">Баб (a/u/i)</th>
             </tr>
           </thead>
           <tbody>
             {filteredVerbs.map((verb) => {
-              const babNum = verb.bab.charAt(0);
-              const babColors: Record<string, string> = {
-                '1': 'var(--mizan-mauve)',
-                '2': '#6B8F71',
-                '3': '#B8860B',
-                '4': '#5F7ADB',
-                '5': '#C0392B',
-                '6': '#8E44AD',
-              };
-              const accentColor = babColors[babNum] || 'var(--mizan-slate)';
-
+              const babNum = String(verb.babInfo.number);
+              const babCssVar = `var(--bab-${babNum})`;
               const isMastered = masteredSet.has(verb.id);
               const isAttempted = attemptedSet.has(verb.id);
 
               return (
-                <tr
-                  key={verb.id}
-                  className="border-t border-[var(--border-default)] hover:bg-[var(--mizan-sand)] transition-colors group cursor-pointer"
-                >
-                  {/* Status indicator */}
+                <tr key={verb.id} className="border-t border-[var(--border-default)] hover:bg-[var(--mizan-sand)] transition-colors group cursor-pointer">
                   <td className="px-2 py-4 text-center border-r border-[var(--border-default)]">
-                    {isMastered ? (
-                      <CheckCircle className="w-4 h-4 text-[var(--color-success)] mx-auto" />
-                    ) : isAttempted ? (
-                      <Circle className="w-4 h-4 text-[var(--mizan-mauve)] mx-auto" />
-                    ) : (
-                      <Minus className="w-4 h-4 text-[var(--mizan-slate)] opacity-30 mx-auto" />
-                    )}
+                    {isMastered ? <CheckCircle className="w-4 h-4 text-[var(--color-success)] mx-auto" /> : isAttempted ? <Circle className="w-4 h-4 text-[var(--mizan-mauve)] mx-auto" /> : <Minus className="w-4 h-4 text-[var(--mizan-slate)] opacity-30 mx-auto" />}
                   </td>
-                  <td className="px-3 py-4 font-mono text-xs text-[var(--mizan-slate)] border-r border-[var(--border-default)]">
-                    {verb.id}
-                  </td>
+                  <td className="px-3 py-4 font-mono text-xs text-[var(--mizan-slate)] border-r border-[var(--border-default)]">{verb.id}</td>
                   <td className="px-4 py-4 text-right border-r border-[var(--border-default)]">
                     <Link href={`/conjugation?verb=${verb.id}`} className="hover:underline">
-                      <ArabicText className="text-2xl text-[var(--mizan-deep)] group-hover:text-[var(--mizan-mauve)] transition-colors">
-                        {verb.arabic}
-                      </ArabicText>
+                      <ArabicText className="text-2xl text-[var(--mizan-deep)] group-hover:text-[var(--mizan-mauve)] transition-colors">{verb.arabic}</ArabicText>
                     </Link>
                   </td>
-                  <td className="px-4 py-4 text-center border-r border-[var(--border-default)]">
-                    <ArabicText className="text-lg text-[var(--mizan-slate)]">
-                      {verb.root}
-                    </ArabicText>
-                  </td>
-                  <td className="px-4 py-4 border-r border-[var(--border-default)]">
-                    <span className="font-mono text-sm text-[var(--mizan-slate)]">
-                      {verb.transliteration}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4 border-r border-[var(--border-default)]">
-                    <span className="font-display italic text-[var(--mizan-deep)]">
-                      {verb.russian}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4 text-right border-r border-[var(--border-default)]">
-                    <ArabicText className="text-lg text-[var(--mizan-slate)]">
-                      {verb.mudari}
-                    </ArabicText>
-                  </td>
+                  <td className="px-4 py-4 text-center border-r border-[var(--border-default)]"><ArabicText className="text-lg text-[var(--mizan-slate)]">{verb.root}</ArabicText></td>
+                  <td className="px-4 py-4 border-r border-[var(--border-default)]"><span className="font-mono text-sm text-[var(--mizan-slate)]">{verb.transliteration}</span></td>
+                  <td className="px-4 py-4 border-r border-[var(--border-default)]"><span className="font-display italic text-[var(--mizan-deep)]">{verb.russian}</span></td>
+                  <td className="px-4 py-4 text-right border-r border-[var(--border-default)]"><ArabicText className="text-lg text-[var(--mizan-slate)]">{verb.mudari}</ArabicText></td>
                   <td className="px-4 py-4 text-center">
-                    <span
-                      className="inline-block px-3 py-1 font-mono text-[10px] uppercase tracking-widest font-bold border"
-                      style={{
-                        color: accentColor,
-                        borderColor: accentColor,
-                        background: `${accentColor}10`,
-                      }}
-                    >
-                      {verb.bab}
-                    </span>
+                    <div className="flex flex-col items-center gap-1">
+                      <span className="inline-block px-3 py-1 font-mono text-xs font-bold rounded-sm" style={{ color: babCssVar, borderColor: babCssVar, border: `1px solid`, background: `color-mix(in srgb, ${babCssVar} 8%, transparent)` }}>{verb.babInfo.vowelLabel}</span>
+                      <span className="font-arabic text-xs text-[var(--mizan-slate)] opacity-70">{verb.babInfo.arabicPattern}</span>
+                    </div>
                   </td>
                 </tr>
               );

@@ -13,12 +13,12 @@ const PARTICIPLE_PATTERNS = {
     f_p: "1َا2ِ3َاتٌ",
   },
   maful: {
-    m_s: "مَ1ْ2ُ3ٌ",
-    m_d: "مَ1ْ2ُ3َانِ",
-    m_p: "مَ1ْ2ُ3ُونَ",
-    f_s: "مَ1ْ2ُ3َةٌ",
-    f_d: "مَ1ْ2ُ3َتَانِ",
-    f_p: "مَ1ْ2ُ3َاتٌ",
+    m_s: "مَ1ْ2ُو3ٌ",
+    m_d: "مَ1ْ2ُو3َانِ",
+    m_p: "مَ1ْ2ُو3ُونَ",
+    f_s: "مَ1ْ2ُو3َةٌ",
+    f_d: "مَ1ْ2ُو3َتَانِ",
+    f_p: "مَ1ْ2ُو3َاتٌ",
   }
 };
 
@@ -117,18 +117,41 @@ export function getRussianPronounTranslation(pronounId: string): string {
   return translations[pronounId] || "";
 }
 
-export function getBab(verb: Verb): string {
+export interface BabInfo {
+  number: number;
+  pastVowel: string;
+  presentVowel: string;
+  vowelLabel: string;
+  arabicPattern: string;
+  arabicExample: string;
+}
+
+const VOWEL_MAP: Record<string, string> = {
+  'َ': 'a',
+  'ُ': 'u',
+  'ِ': 'i',
+};
+
+export function getBabInfo(verb: Verb): BabInfo {
   const past = verb.pastVowel || 'َ';
   const present = verb.mudariVowel;
-  
-  if (past === 'َ' && present === 'ُ') return '1 (نَصَرَ)';
-  if (past === 'َ' && present === 'ِ') return '2 (ضَرَبَ)';
-  if (past === 'َ' && present === 'َ') return '3 (فَتَحَ)';
-  if (past === 'ِ' && present === 'َ') return '4 (عَلِمَ)';
-  if (past === 'ُ' && present === 'ُ') return '5 (حَسُنَ)';
-  if (past === 'ِ' && present === 'ِ') return '6 (حَسِبَ)';
-  
-  return '?';
+  const pastLetter = VOWEL_MAP[past] || '?';
+  const presentLetter = VOWEL_MAP[present] || '?';
+
+  if (past === 'َ' && present === 'ُ') return { number: 1, pastVowel: pastLetter, presentVowel: presentLetter, vowelLabel: `${pastLetter}-${presentLetter}`, arabicPattern: 'فَعَلَ—يَفْعُلُ', arabicExample: 'نَصَرَ' };
+  if (past === 'َ' && present === 'ِ') return { number: 2, pastVowel: pastLetter, presentVowel: presentLetter, vowelLabel: `${pastLetter}-${presentLetter}`, arabicPattern: 'فَعَلَ—يَفْعِلُ', arabicExample: 'ضَرَبَ' };
+  if (past === 'َ' && present === 'َ') return { number: 3, pastVowel: pastLetter, presentVowel: presentLetter, vowelLabel: `${pastLetter}-${presentLetter}`, arabicPattern: 'فَعَلَ—يَفْعَلُ', arabicExample: 'فَتَحَ' };
+  if (past === 'ِ' && present === 'َ') return { number: 4, pastVowel: pastLetter, presentVowel: presentLetter, vowelLabel: `${pastLetter}-${presentLetter}`, arabicPattern: 'فَعِلَ—يَفْعَلُ', arabicExample: 'عَلِمَ' };
+  if (past === 'ُ' && present === 'ُ') return { number: 5, pastVowel: pastLetter, presentVowel: presentLetter, vowelLabel: `${pastLetter}-${presentLetter}`, arabicPattern: 'فَعُلَ—يَفْعُلُ', arabicExample: 'حَسُنَ' };
+  if (past === 'ِ' && present === 'ِ') return { number: 6, pastVowel: pastLetter, presentVowel: presentLetter, vowelLabel: `${pastLetter}-${presentLetter}`, arabicPattern: 'فَعِلَ—يَفْعِلُ', arabicExample: 'حَسِبَ' };
+
+  return { number: 0, pastVowel: '?', presentVowel: '?', vowelLabel: '?', arabicPattern: '?', arabicExample: '?' };
+}
+
+/** @deprecated Use getBabInfo() for structured data */
+export function getBab(verb: Verb): string {
+  const info = getBabInfo(verb);
+  return `${info.number} — ${info.vowelLabel}`;
 }
 
 export function getParticiple(verb: Verb, type: 'fail' | 'maful', form: ParticipleForm): string {
@@ -166,8 +189,16 @@ export function getRussianVerbTranslation(verbRussian: string, tense: Tense, pro
   const pronoun = omitPronoun ? '' : getRussianPronounTranslation(pronounId) + ' ';
   
   if (tense === 'past') {
-    if (['hiya', 'anti'].includes(pronounId)) return `${pronoun}${base}а`.trim();
-    if (['hum', 'hunna', 'antuma', 'antum', 'antunna', 'nahnu'].includes(pronounId)) return `${pronoun}${base}ли`.trim();
+    let female = `${base}а`;
+    let plural = `${base}ли`;
+    if (base.endsWith('л')) {
+      plural = base.slice(0, -1) + 'ли';
+    } else if (base.endsWith('лся')) {
+      female = base.slice(0, -2) + 'ась';
+      plural = base.slice(0, -3) + 'лись';
+    }
+    if (['hiya', 'anti'].includes(pronounId)) return `${pronoun}${female}`.trim();
+    if (['hum', 'hunna', 'antuma', 'antum', 'antunna', 'nahnu'].includes(pronounId)) return `${pronoun}${plural}`.trim();
     return `${pronoun}${base}`.trim();
   }
   

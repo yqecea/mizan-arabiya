@@ -8,6 +8,8 @@ import { ArabicText } from '@/components/ArabicText';
 import Link from 'next/link';
 import { RotateCcw, CheckCircle, XCircle, Shuffle, Trophy, Target } from 'lucide-react';
 
+import SarfAnalysis from '@/components/SarfAnalysis';
+
 interface ExamCell {
   pronounId: string;
   columnKey: string;
@@ -102,6 +104,7 @@ function normalizeArabic(text: string): string {
 export default function ExamSimulator() {
   const { progress, updateProgress } = useProgress();
   const [exam, setExam] = useState<ExamConfig | null>(null);
+  const [activePart, setActivePart] = useState<'A' | 'B'>('A');
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isChecked, setIsChecked] = useState(false);
   const [results, setResults] = useState<Record<string, boolean>>({});
@@ -222,7 +225,7 @@ export default function ExamSimulator() {
   return (
     <div className="max-w-7xl mx-auto space-y-6 animate-fade-slide-up">
       {/* Header */}
-      <header className="mb-6 border-b border-[var(--mizan-deep)] pb-6">
+      <header className="mb-6 border-b border-[var(--border-default)] pb-6">
         <nav className="flex flex-wrap items-center gap-2 text-micro-label mb-4 text-[var(--mizan-slate)]">
           <Link href="/" className="hover:text-[var(--mizan-deep)] transition-colors">ГЛАВНАЯ</Link>
           <span className="text-[var(--mizan-sand)]">/</span>
@@ -231,10 +234,10 @@ export default function ExamSimulator() {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <h1 className="text-3xl md:text-4xl heading-display-black text-[var(--mizan-deep)] uppercase tracking-tight">
-              Экзамен — 1 часть сарфа
+              Экзамен — сарф
             </h1>
             <p className="font-display italic text-lg text-[var(--mizan-slate)] mt-1">
-              Заполни таблицу спряжений для данного глагола
+              Проверь свои знания морфологии и спряжений
             </p>
           </div>
           <button
@@ -247,6 +250,36 @@ export default function ExamSimulator() {
         </div>
       </header>
 
+      {/* Part Toggle */}
+      <div className="flex justify-center border-b border-[var(--border-default)]">
+        <div className="flex gap-8">
+          <button
+            onClick={() => setActivePart('A')}
+            className={`pb-4 font-mono text-sm tracking-widest uppercase transition-all border-b-2 ${
+              activePart === 'A'
+                ? 'border-[var(--mizan-deep)] text-[var(--mizan-deep)] font-bold'
+                : 'border-transparent text-[var(--mizan-slate)] hover:text-[var(--mizan-deep)]'
+            }`}
+          >
+            Часть А (Разбор)
+          </button>
+          <button
+            onClick={() => setActivePart('B')}
+            className={`pb-4 font-mono text-sm tracking-widest uppercase transition-all border-b-2 ${
+              activePart === 'B'
+                ? 'border-[var(--mizan-deep)] text-[var(--mizan-deep)] font-bold'
+                : 'border-transparent text-[var(--mizan-slate)] hover:text-[var(--mizan-deep)]'
+            }`}
+          >
+            Часть Б (Таблица)
+          </button>
+        </div>
+      </div>
+
+      {activePart === 'A' ? (
+        <SarfAnalysis verb={exam.verb} />
+      ) : (
+        <>
       {/* Progress Stats Strip */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         <div className="flex items-center gap-3 px-4 py-3 border border-[var(--border-default)] bg-[var(--bg-card)]">
@@ -270,7 +303,7 @@ export default function ExamSimulator() {
       </div>
 
       {/* Verb Display */}
-      <div className="bg-[var(--bg-card)] border border-[var(--mizan-deep)] p-6 md:p-8 flex flex-col md:flex-row items-center gap-6 shadow-[8px_8px_0_0_var(--mizan-sand)]">
+      <div className="bg-[var(--bg-card)] border border-[var(--border-strong)] p-6 md:p-8 flex flex-col md:flex-row items-center gap-6 rounded-[var(--radius-md)] shadow-[var(--shadow-soft)]">
         <div className="text-center md:text-right flex-1">
           <div className="font-mono text-[10px] uppercase tracking-widest text-[var(--mizan-slate)] mb-2">
             Глагол для экзамена
@@ -320,8 +353,8 @@ export default function ExamSimulator() {
         </div>
       )}
 
-      {/* Exam Table */}
-      <div className="w-full overflow-x-auto border border-[var(--mizan-deep)] bg-[var(--bg-card)]">
+      {/* Exam Table — Desktop */}
+      <div className="hidden md:block w-full overflow-x-auto border border-[var(--border-strong)] bg-[var(--bg-card)] rounded-[var(--radius-md)] overflow-hidden">
         <table className="w-full min-w-[950px]" style={{ direction: 'ltr' }}>
           <thead>
             <tr className="bg-[var(--mizan-deep)] text-[var(--mizan-sand)]">
@@ -428,13 +461,83 @@ export default function ExamSimulator() {
         </table>
       </div>
 
+      {/* Exam Cards — Mobile */}
+      <div className="md:hidden space-y-4">
+        {EXAM_PRONOUNS.map((pronoun) => (
+          <div key={pronoun.id} className="bg-[var(--bg-card)] border border-[var(--border-default)] rounded-[var(--radius-md)] overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 bg-[var(--mizan-deep)] text-[var(--mizan-cream)]">
+              <ArabicText className="text-lg font-bold">{pronoun.arabic}</ArabicText>
+              <span className="font-mono text-[10px] uppercase tracking-widest">{pronoun.russian}</span>
+            </div>
+            <div className="p-3 space-y-2">
+              {EXAM_COLUMNS.map(col => {
+                const cell = exam.cells.find(c => c.pronounId === pronoun.id && c.columnKey === col.key);
+                if (!cell) return null;
+                const key = cellKey(pronoun.id, col.key);
+
+                if (!cell.mustFill || cell.correctAnswer === '—') {
+                  return (
+                    <div key={col.key} className="flex items-center justify-between py-2 px-3 bg-[var(--mizan-sand)] rounded-[var(--radius-sm)]">
+                      <span className="font-mono text-[10px] uppercase text-[var(--mizan-slate)]">{col.label}</span>
+                      {cell.correctAnswer === '—'
+                        ? <span className="text-[var(--mizan-slate)] opacity-30">—</span>
+                        : <ArabicText className="text-base text-[var(--mizan-slate)] opacity-60">{cell.correctAnswer}</ArabicText>
+                      }
+                    </div>
+                  );
+                }
+
+                const userAnswer = answers[key] || '';
+                const isCorrectResult = results[key];
+                const showResult = isChecked && isCorrectResult !== undefined;
+                let inputBg = 'var(--bg-primary)';
+                if (showResult) inputBg = isCorrectResult ? 'var(--color-success-bg)' : 'var(--color-error-bg)';
+
+                return (
+                  <div key={col.key} className="flex items-center gap-3 py-1">
+                    <span className="font-mono text-[10px] uppercase text-[var(--mizan-slate)] w-24 flex-shrink-0">{col.label}</span>
+                    <div className="flex-1 relative">
+                      <input
+                        ref={el => { if (el) inputRefs.current.set(key, el); }}
+                        type="text"
+                        value={userAnswer}
+                        onChange={e => handleInputChange(pronoun.id, col.key, e.target.value)}
+                        onKeyDown={e => handleKeyDown(e, pronoun.id, col.key)}
+                        disabled={isChecked}
+                        className="w-full font-arabic text-lg text-center py-2 px-2 border border-[var(--border-default)] rounded-[var(--radius-sm)] focus:border-[var(--mizan-mauve)] focus:outline-none transition-colors min-h-[44px]"
+                        style={{ background: inputBg, direction: 'rtl' }}
+                        dir="rtl"
+                        placeholder="..."
+                      />
+                      {showResult && !isCorrectResult && (
+                        <div className="mt-0.5 text-center">
+                          <ArabicText className="text-xs text-[var(--color-success)]">{cell.correctAnswer}</ArabicText>
+                        </div>
+                      )}
+                      {showResult && (
+                        <div className="absolute top-1 right-1">
+                          {isCorrectResult
+                            ? <CheckCircle className="w-3 h-3 text-[var(--color-success)]" />
+                            : <XCircle className="w-3 h-3 text-[var(--color-error)]" />
+                          }
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-4">
         {!isChecked ? (
           <button
             onClick={checkExam}
             disabled={filledCount === 0}
-            className="flex-1 py-5 border border-[var(--mizan-deep)] bg-[var(--bg-card)] text-[var(--mizan-deep)] font-mono text-sm uppercase tracking-[0.2em] transition-all hover:bg-[var(--mizan-sand)] active:bg-[var(--mizan-warm)] shadow-[4px_4px_0_0_var(--mizan-deep)] hover:shadow-none hover:translate-y-[4px] hover:translate-x-[4px] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-[4px_4px_0_0_var(--mizan-deep)] disabled:hover:translate-y-0 disabled:hover:translate-x-0"
+            className="flex-1 py-4 border border-[var(--border-strong)] bg-[var(--bg-card)] text-[var(--mizan-deep)] font-mono text-sm uppercase tracking-[0.2em] transition-all hover:bg-[var(--mizan-sand)] active:bg-[var(--mizan-warm)] rounded-[var(--radius-md)] shadow-[var(--shadow-soft)] min-h-[54px] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Проверить ответы
           </button>
@@ -442,7 +545,7 @@ export default function ExamSimulator() {
           <>
             <button
               onClick={() => startNewExam()}
-              className="flex-1 flex items-center justify-center gap-2 py-5 border border-[var(--mizan-deep)] bg-[var(--bg-card)] text-[var(--mizan-deep)] font-mono text-sm uppercase tracking-[0.2em] transition-all hover:bg-[var(--mizan-sand)] active:bg-[var(--mizan-warm)] shadow-[4px_4px_0_0_var(--mizan-deep)] hover:shadow-none hover:translate-y-[4px] hover:translate-x-[4px]"
+              className="flex-1 flex items-center justify-center gap-2 py-4 border border-[var(--border-strong)] bg-[var(--bg-card)] text-[var(--mizan-deep)] font-mono text-sm uppercase tracking-[0.2em] transition-all hover:bg-[var(--mizan-sand)] active:bg-[var(--mizan-warm)] rounded-[var(--radius-md)] shadow-[var(--shadow-soft)] min-h-[54px]"
             >
               <RotateCcw className="w-4 h-4" />
               Новый экзамен
@@ -450,7 +553,7 @@ export default function ExamSimulator() {
             {score.correct < score.total && (
               <button
                 onClick={() => startNewExam(exam.verb.id)}
-                className="flex-1 flex items-center justify-center gap-2 py-5 border border-[var(--mizan-deep)] bg-[var(--bg-card)] text-[var(--mizan-deep)] font-mono text-sm uppercase tracking-[0.2em] transition-all hover:bg-[var(--mizan-sand)] active:bg-[var(--mizan-warm)] shadow-[4px_4px_0_0_var(--mizan-deep)] hover:shadow-none hover:translate-y-[4px] hover:translate-x-[4px]"
+                className="flex-1 flex items-center justify-center gap-2 py-4 border border-[var(--border-strong)] bg-[var(--bg-card)] text-[var(--mizan-deep)] font-mono text-sm uppercase tracking-[0.2em] transition-all hover:bg-[var(--mizan-sand)] active:bg-[var(--mizan-warm)] rounded-[var(--radius-md)] shadow-[var(--shadow-soft)] min-h-[54px]"
               >
                 <Target className="w-4 h-4" />
                 Повторить глагол
@@ -474,6 +577,8 @@ export default function ExamSimulator() {
           <li>• Используй арабскую клавиатуру для ввода</li>
         </ul>
       </div>
+        </>
+      )}
     </div>
   );
 }

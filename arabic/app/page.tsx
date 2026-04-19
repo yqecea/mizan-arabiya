@@ -68,15 +68,15 @@ export default function Dashboard() {
           </p>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border border-[var(--mizan-deep)] bg-[var(--bg-primary)]">
-          <Link href="/vocabulary" className="block p-8 border-b md:border-b-0 md:border-r border-[var(--mizan-deep)] flex flex-col items-start hover:bg-[var(--mizan-sand)] transition-colors group cursor-pointer text-left">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border border-[var(--border-strong)] bg-[var(--bg-primary)] rounded-[var(--radius-md)] overflow-hidden">
+          <Link href="/vocabulary" className="block p-8 border-b md:border-b-0 md:border-r border-[var(--border-default)] flex flex-col items-start hover:bg-[var(--mizan-sand)] transition-colors group cursor-pointer text-left">
             <span className="font-mono text-4xl font-black text-[var(--mizan-sand)] group-hover:text-[var(--mizan-mauve)] transition-colors mb-6">01</span>
             <h2 className="text-xl font-bold uppercase tracking-wider mb-3 text-[var(--text-primary)]">Лексика</h2>
             <p className="font-mono text-xs text-[var(--mizan-slate)] mb-6 leading-relaxed">
               Освойте базовые глаголы и их значения. Формирование словарного запаса — первый шаг.
             </p>
           </Link>
-          <Link href="/conjugation" className="block p-8 border-b md:border-b-0 md:border-r border-[var(--mizan-deep)] flex flex-col items-start hover:bg-[var(--mizan-sand)] transition-colors group cursor-pointer text-left">
+          <Link href="/conjugation" className="block p-8 border-b md:border-b-0 md:border-r border-[var(--border-default)] flex flex-col items-start hover:bg-[var(--mizan-sand)] transition-colors group cursor-pointer text-left">
             <span className="font-mono text-4xl font-black text-[var(--mizan-sand)] group-hover:text-[var(--mizan-mauve)] transition-colors mb-6">02</span>
             <h2 className="text-xl font-bold uppercase tracking-wider mb-3 text-[var(--text-primary)]">Спряжения</h2>
             <p className="font-mono text-xs text-[var(--mizan-slate)] mb-6 leading-relaxed">
@@ -94,7 +94,7 @@ export default function Dashboard() {
 
         <Link
           href="/exam"
-          className="block w-full bg-[var(--mizan-deep)] text-[var(--mizan-cream)] text-center py-6 font-mono text-lg uppercase tracking-widest font-bold hover:bg-[var(--mizan-slate)] transition-colors min-h-[48px]"
+          className="block w-full bg-[var(--mizan-deep)] text-[var(--mizan-cream)] text-center py-6 font-mono text-lg uppercase tracking-widest font-bold hover:bg-[var(--mizan-slate)] transition-colors min-h-[48px] rounded-[var(--radius-md)]"
         >
           Начать подготовку к экзамену
         </Link>
@@ -137,7 +137,7 @@ export default function Dashboard() {
 
         {/* Streak Badge */}
         {streakCount > 0 && (
-          <div className="flex items-center gap-3 px-5 py-3 border border-[var(--mizan-deep)] bg-[var(--bg-card)] shadow-[4px_4px_0_0_var(--mizan-sand)]">
+          <div className="flex items-center gap-3 px-5 py-3 border border-[var(--border-default)] bg-[var(--bg-card)] rounded-[var(--radius-md)] shadow-[var(--shadow-soft)]">
             <Flame className="w-6 h-6 text-[#e67e22]" />
             <div>
               <div className="font-mono text-2xl font-black text-[var(--mizan-deep)] leading-none">{streakCount}</div>
@@ -152,7 +152,7 @@ export default function Dashboard() {
       {/* Exam CTA — Primary Call-to-Action */}
       <Link
         href="/exam"
-        className="block border-2 border-[var(--mizan-deep)] bg-[var(--bg-card)] p-6 md:p-8 hover:bg-[var(--mizan-sand)] transition-all shadow-[8px_8px_0_0_var(--mizan-sand)] hover:shadow-none hover:translate-y-[8px] hover:translate-x-[8px] group"
+        className="block border border-[var(--border-strong)] bg-[var(--bg-card)] p-6 md:p-8 hover:bg-[var(--bg-card-hover)] transition-all rounded-[var(--radius-md)] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-hover)] group"
       >
         <div className="flex flex-col md:flex-row items-center gap-6">
           <div className="flex-shrink-0 w-16 h-16 flex items-center justify-center bg-[var(--mizan-deep)] text-[var(--mizan-cream)]">
