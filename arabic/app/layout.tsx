@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Montserrat, Playfair_Display, Amiri } from 'next/font/google';
 import './globals.css';
 import { Sidebar } from '@/components/Sidebar';
+import { GuidedTour } from '@/components/GuidedTour';
 
 const montserrat = Montserrat({
   subsets: ['latin', 'cyrillic'],
@@ -65,6 +66,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
           </main>
         </div>
+        <GuidedTour />
       </body>
     </html>
   );

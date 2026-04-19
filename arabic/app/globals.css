@@ -504,3 +504,55 @@ body {
     font-size: 16px;
   }
 }
+
+/* ═══════════════════════════════════════════════
+   GUIDED TOUR — Tooltip arrows & animations
+   ═══════════════════════════════════════════════ */
+
+@keyframes tourFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes tourPulse {
+  0%, 100% { box-shadow: 4px 4px 0 0 var(--mizan-mauve); }
+  50%      { box-shadow: 4px 4px 0 0 var(--mizan-mauve), 0 0 16px rgba(165, 136, 126, 0.4); }
+}
+
+.tour-tooltip::before {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: var(--mizan-ink);
+  border: 2px solid var(--mizan-mauve);
+  transform: rotate(45deg);
+}
+
+.tour-tooltip.arrow-left::before {
+  left: -8px;
+  top: 24px;
+  border-right: none;
+  border-top: none;
+}
+
+.tour-tooltip.arrow-right::before {
+  right: -8px;
+  top: 24px;
+  border-left: none;
+  border-bottom: none;
+}
+
+.tour-tooltip.arrow-top::before {
+  top: -8px;
+  left: 24px;
+  border-bottom: none;
+  border-right: none;
+}
+
+.tour-tooltip.arrow-bottom::before {
+  bottom: -8px;
+  left: 24px;
+  border-top: none;
+  border-left: none;
+}
